@@ -1,7 +1,7 @@
 <x-guest-layout>
     <div>
         <p class="text-sm uppercase tracking-[0.2em] text-emerald-300">Onboarding</p>
-        <h2 class="mt-3 text-3xl font-bold text-white" style="font-family: 'Space Grotesk', sans-serif;">Create your employee account</h2>
+        <h2 class="mt-3 text-3xl font-bold text-cyan-200" style="font-family: 'Space Grotesk', sans-serif;">Create your employee account</h2>
         <p class="mt-2 text-sm text-slate-300">Set your public alias for anonymous discussions inside your company workspace.</p>
     </div>
 

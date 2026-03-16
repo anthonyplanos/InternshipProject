@@ -29,7 +29,7 @@
                         @else
                             <a href="{{ route('login') }}" class="rounded-xl border border-white/20 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-white/10">Login</a>
                             @if (Route::has('register'))
-                                <a href="{{ route('register') }}" class="rounded-xl bg-emerald-300 px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-emerald-200">Join Workspace</a>
+                                <a href="{{ route('register') }}" class="rounded-xl bg-emerald-300 px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-emerald-200">Register</a>
                             @endif
                         @endauth
                     </nav>
@@ -39,7 +39,7 @@
             <main class="relative z-10 mx-auto grid w-full max-w-7xl items-center gap-12 px-6 pb-14 pt-10 lg:grid-cols-2 lg:px-10 lg:pb-20">
                 <section>
                     <p class="inline-flex rounded-full border border-cyan-300/30 bg-cyan-300/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-200">Internal Collaboration Platform</p>
-                    <h1 class="mt-6 text-4xl font-bold leading-tight text-white sm:text-5xl" style="font-family: 'Space Grotesk', sans-serif;">
+                    <h1 class="mt-6 text-4xl font-bold leading-tight text-cyan-200 sm:text-5xl" style="font-family: 'Space Grotesk', sans-serif;">
                         Anonymous ideas.
                         <br>
                         Better workplace decisions.
@@ -55,7 +55,7 @@
                 </section>
 
                 <section class="rounded-3xl border border-white/10 bg-slate-900/70 p-6 shadow-2xl shadow-cyan-950/20 backdrop-blur sm:p-8">
-                    <h2 class="text-xl font-bold text-white" style="font-family: 'Space Grotesk', sans-serif;">What employees can do</h2>
+                    <h2 class="text-xl font-bold text-cyan-200" style="font-family: 'Space Grotesk', sans-serif;">What employees can do</h2>
 
                     <div class="mt-6 space-y-4">
                         <article class="rounded-2xl border border-white/10 bg-white/5 p-4">

@@ -3,7 +3,7 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-xs uppercase tracking-[0.2em] text-cyan-200">Company Feed</p>
-                <h2 class="mt-1 text-2xl font-bold text-white" style="font-family: 'Space Grotesk', sans-serif;">Idea Stream</h2>
+                <h2 class="mt-1 text-2xl font-bold text-cyan-200" style="font-family: 'Space Grotesk', sans-serif;">Idea Stream</h2>
             </div>
             <span class="rounded-full border border-emerald-300/30 bg-emerald-300/10 px-3 py-1 text-xs font-medium text-emerald-200">Anonymous Mode Active</span>
         </div>
@@ -31,7 +31,7 @@
                 @endif
 
                 <div class="rounded-2xl border border-white/10 bg-slate-900/80 p-5 shadow-xl shadow-cyan-950/20">
-                    <h3 class="text-lg font-semibold text-white" style="font-family: 'Space Grotesk', sans-serif;">Create a Post</h3>
+                    <h3 class="text-lg font-semibold text-cyan-200" style="font-family: 'Space Grotesk', sans-serif;">Create a Post</h3>
                     <p class="mt-1 text-sm text-slate-300">Share your idea, concern, or suggestion anonymously.</p>
 
                     <form method="POST" action="{{ route('posts.store') }}" enctype="multipart/form-data" class="mt-4 space-y-4">
@@ -90,7 +90,7 @@
 
             <aside class="space-y-5 lg:col-span-3">
                 <div class="rounded-2xl border border-white/10 bg-slate-900/80 p-5 shadow-xl shadow-cyan-950/20">
-                    <p class="text-sm font-semibold text-white">Community Health</p>
+                    <p class="text-sm font-semibold text-cyan-200">Community Health</p>
                     <ul class="mt-3 space-y-2 text-sm text-slate-300">
                         <li class="rounded-lg bg-white/5 px-3 py-2">Respectful discourse score: 95%</li>
                         <li class="rounded-lg bg-white/5 px-3 py-2">Posts this week: 48</li>
@@ -99,7 +99,7 @@
                 </div>
 
                 <div class="rounded-2xl border border-white/10 bg-slate-900/80 p-5 shadow-xl shadow-cyan-950/20">
-                    <p class="text-sm font-semibold text-white">Posting Tips</p>
+                    <p class="text-sm font-semibold text-cyan-200">Posting Tips</p>
                     <ul class="mt-3 list-disc space-y-2 ps-5 text-sm text-slate-300">
                         <li>Describe the issue and why it matters.</li>
                         <li>Suggest one realistic improvement.</li>
