@@ -1,59 +1,152 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
-
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <a href="https://laravel.com" target="_blank">
+	<img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="420" alt="Laravel Logo">
+  </a>
 </p>
 
-## About Laravel
+<h1 align="center">InternshipProject</h1>
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+<p align="center">
+Laravel application with Breeze authentication, Filament admin panel, Spatie roles and permissions, Livewire components, and activity logging.
+</p>
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Features
 
-## Learning Laravel
+- Authentication with Laravel Breeze
+- Admin panel powered by Filament
+- Roles and permissions with Spatie
+- Activity and audit logging
+- Soft deletes for posts
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## Tech Stack
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- PHP / Laravel
+- MySQL
+- Vite + NPM
+- Tailwind CSS
+- Livewire
 
-## Laravel Sponsors
+## Prerequisites
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Install these first:
 
-### Premium Partners
+- PHP 8.2+ (recommended)
+- Composer 2+
+- Node.js 18+ and NPM
+- MySQL (XAMPP is supported)
+- Git
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+Check your versions:
 
-## Contributing
+	php -v
+	composer -V
+	node -v
+	npm -v
+	mysql --version
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Quick Start (Windows / XAMPP Friendly)
 
-## Code of Conduct
+1. Clone the repository
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+	git clone https://github.com/anthonyplanos/InternshipProject.git
+	cd InternshipProject
 
-## Security Vulnerabilities
+2. Install backend and frontend dependencies
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+	composer install
+	npm install
+
+3. Create your environment file
+
+	copy .env.example .env
+
+4. Create a MySQL database
+
+- Start Apache and MySQL in XAMPP
+- Open phpMyAdmin: http://localhost/phpmyadmin
+- Create a new database, for example: internship_project
+
+5. Configure environment values in .env
+
+Update these values to match your local database:
+
+	DB_CONNECTION=mysql
+	DB_HOST=127.0.0.1
+	DB_PORT=3306
+	DB_DATABASE=internship_project
+	DB_USERNAME=root
+	DB_PASSWORD=
+
+6. Run Laravel setup
+
+	php artisan key:generate
+	php artisan migrate
+
+7. Run the app
+
+In terminal 1:
+
+	php artisan serve
+
+In terminal 2:
+
+	npm run dev
+
+Open: http://127.0.0.1:8000
+
+## Quick Start (macOS / Linux)
+
+	git clone https://github.com/anthonyplanos/InternshipProject.git
+	cd InternshipProject
+	composer install
+	npm install
+	cp .env.example .env
+	php artisan key:generate
+
+Then configure database values in .env and run:
+
+	php artisan migrate
+	php artisan serve
+	npm run dev
+
+## Common Issues
+
+1. Vite manifest not found
+
+Run:
+
+	npm run dev
+
+2. SQLSTATE access denied
+
+Recheck DB_DATABASE, DB_USERNAME, DB_PASSWORD, and DB_PORT in .env.
+
+3. Class or cache issues after pulling changes
+
+Run:
+
+	php artisan optimize:clear
+
+4. APP_KEY missing
+
+Run:
+
+	php artisan key:generate
+
+## Useful Commands
+
+	php artisan migrate:fresh --seed
+	php artisan test
+	php artisan optimize:clear
+
+## Notes
+
+- All required packages are already defined in composer.json and package.json.
+- Roles, permissions, Filament, and activity log dependencies are installed through Composer.
+- Default MySQL port for XAMPP is 3306.
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is open-sourced software licensed under the MIT license.
