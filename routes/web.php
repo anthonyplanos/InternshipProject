@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Post;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -13,17 +14,32 @@ Route::get('/dashboard', function (Request $request) {
         return redirect('/admin');
     }
 
-    return view('dashboard');
+    $posts = Post::query()
+        ->with('user')
+        ->latest()
+        ->paginate(10);
+
+    return view('dashboard', compact('posts'));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::post('/posts', function (Request $request) {
-        $request->validate([
-            'content' => ['required', 'string', 'max:1200'],
-            'attachment' => ['nullable', 'file', 'max:5120', 'mimes:jpg,jpeg,png,pdf'],
+        $validated = $request->validate([
+            'content' => ['required', 'string', 'max:200'],
+            'attachment' => ['nullable', 'image', 'max:5120', 'mimes:jpg,jpeg,png,gif,webp'],
         ]);
 
-        return back()->with('status', 'Post submitted. Persistence will be wired in the next step.');
+        $attachmentPath = $request->hasFile('attachment')
+            ? $request->file('attachment')->store('post-attachments', 'public')
+            : null;
+
+        Post::create([
+            'user_id' => $request->user()->id,
+            'content' => $validated['content'],
+            'attachment' => $attachmentPath,
+        ]);
+
+        return back()->with('status', 'Post published successfully.');
     })->name('posts.store');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

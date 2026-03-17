@@ -9,7 +9,22 @@
         </div>
     </x-slot>
 
-    <div class="min-h-screen bg-slate-950 pb-12">
+    <div
+        class="min-h-screen bg-slate-950 pb-12"
+        x-data="{
+            modalOpen: false,
+            imageUrl: '',
+            openImage(url) {
+                this.imageUrl = url;
+                this.modalOpen = true;
+            },
+            closeImage() {
+                this.modalOpen = false;
+                this.imageUrl = '';
+            }
+        }"
+        @keydown.escape.window="closeImage()"
+    >
         <div class="mx-auto grid w-full max-w-7xl gap-6 px-4 pt-8 sm:px-6 lg:grid-cols-12 lg:px-8">
             <aside class="lg:col-span-3">
                 <div class="rounded-2xl border border-white/10 bg-slate-900/80 p-5 text-slate-200 shadow-xl shadow-cyan-950/20">
@@ -46,8 +61,8 @@
                         </div>
 
                         <div>
-                            <label for="attachment" class="mb-2 block text-sm font-medium text-slate-200">Attachment (optional)</label>
-                            <input id="attachment" type="file" name="attachment" accept=".jpg,.jpeg,.png,.pdf" class="block w-full rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-2 text-sm text-slate-200 file:me-4 file:rounded-lg file:border-0 file:bg-cyan-300 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-slate-900 hover:file:bg-cyan-200" />
+                            <label for="attachment" class="mb-2 block text-sm font-medium text-slate-200">Image (optional)</label>
+                            <input id="attachment" type="file" name="attachment" accept=".jpg,.jpeg,.png,.gif,.webp" class="block w-full rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-2 text-sm text-slate-200 file:me-4 file:rounded-lg file:border-0 file:bg-cyan-300 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-slate-900 hover:file:bg-cyan-200" />
                             @error('attachment')
                                 <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
                             @enderror
@@ -62,29 +77,41 @@
                 </div>
 
                 <div class="space-y-4">
-                    <article class="rounded-2xl border border-white/10 bg-slate-900/80 p-5 shadow-xl shadow-cyan-950/20">
-                        <div class="flex items-center justify-between">
-                            <p class="text-sm font-semibold text-cyan-200">@QuietStrategist</p>
-                            <span class="text-xs text-slate-400">2h ago</span>
-                        </div>
-                        <p class="mt-3 text-sm leading-relaxed text-slate-200">Could we reserve one focus day every two weeks with no internal meetings? It may increase deep work output for engineering and product teams.</p>
-                        <div class="mt-4 flex items-center gap-3 text-xs text-slate-300">
-                            <span class="rounded-full bg-white/10 px-3 py-1">34 upvotes</span>
-                            <span class="rounded-full bg-white/10 px-3 py-1">12 comments</span>
-                        </div>
-                    </article>
+                    @forelse ($posts as $post)
+                        <article class="rounded-2xl border border-white/10 bg-slate-900/80 p-5 shadow-xl shadow-cyan-950/20">
+                            <div class="flex items-center justify-between gap-3">
+                                <div class="flex items-center gap-2">
+                                    <p class="text-sm font-semibold text-cyan-200">{{ $post->user->name ?? 'Unknown User' }}</p>
+                                    @if (($post->user?->isAdmin()))
+                                        <span class="rounded-full border border-amber-300/30 bg-amber-300/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-200">Admin</span>
+                                    @endif
+                                </div>
+                                <span class="text-xs text-slate-400">{{ $post->created_at?->diffForHumans() }}</span>
+                            </div>
 
-                    <article class="rounded-2xl border border-white/10 bg-slate-900/80 p-5 shadow-xl shadow-cyan-950/20">
-                        <div class="flex items-center justify-between">
-                            <p class="text-sm font-semibold text-emerald-200">@GrowthMaker</p>
-                            <span class="text-xs text-slate-400">5h ago</span>
+                            <p class="mt-3 whitespace-pre-line text-sm leading-relaxed text-slate-200">{{ $post->content }}</p>
+
+                            @if ($post->attachment)
+                                <div class="mt-4">
+                                    <button
+                                        type="button"
+                                        @click="openImage('{{ asset('storage/' . $post->attachment) }}')"
+                                        class="inline-flex items-center rounded-lg border border-cyan-300/30 bg-cyan-300/10 px-3 py-1.5 text-xs font-medium text-cyan-100 hover:bg-cyan-300/20"
+                                    >
+                                        View Image
+                                    </button>
+                                </div>
+                            @endif
+                        </article>
+                    @empty
+                        <div class="rounded-2xl border border-white/10 bg-slate-900/80 p-5 text-sm text-slate-300 shadow-xl shadow-cyan-950/20">
+                            No posts yet. Be the first to share an idea.
                         </div>
-                        <p class="mt-3 text-sm leading-relaxed text-slate-200">Suggestion: create a monthly cross-team demo day where anyone can showcase prototypes or internal automations that saved time.</p>
-                        <div class="mt-4 flex items-center gap-3 text-xs text-slate-300">
-                            <span class="rounded-full bg-white/10 px-3 py-1">21 upvotes</span>
-                            <span class="rounded-full bg-white/10 px-3 py-1">7 comments</span>
-                        </div>
-                    </article>
+                    @endforelse
+
+                    <div>
+                        {{ $posts->links() }}
+                    </div>
                 </div>
             </section>
 
@@ -107,6 +134,40 @@
                     </ul>
                 </div>
             </aside>
+        </div>
+
+        <div
+            x-show="modalOpen"
+            x-transition.opacity
+            class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 px-4"
+            style="display: none;"
+            @click.self="closeImage()"
+        >
+            <div class="w-full max-w-2xl rounded-2xl border border-white/10 bg-slate-900 p-3 shadow-2xl shadow-cyan-950/40">
+                <div class="mb-3 flex items-center justify-between px-2">
+                    <p class="text-sm font-semibold text-cyan-200">Image Preview</p>
+                    <button
+                        type="button"
+                        @click="closeImage()"
+                        class="rounded-lg border border-white/15 px-3 py-1 text-xs font-medium text-slate-200 hover:bg-white/10"
+                    >
+                        Close
+                    </button>
+                </div>
+
+                <div class="max-h-[60vh] overflow-auto rounded-xl border border-white/10 bg-slate-950 p-2">
+                    <img :src="imageUrl" alt="Post image preview" class="mx-auto max-h-[50vh] max-w-full rounded-lg object-contain" />
+                </div>
+
+                <div class="mt-3 flex items-center justify-end gap-2 px-2 pb-1">
+                    <a :href="imageUrl" target="_blank" rel="noopener noreferrer" class="rounded-lg border border-white/15 px-3 py-1.5 text-xs font-medium text-slate-200 hover:bg-white/10">
+                        Open in New Tab
+                    </a>
+                    <a :href="imageUrl" download class="rounded-lg bg-cyan-300 px-3 py-1.5 text-xs font-semibold text-slate-900 hover:bg-cyan-200">
+                        Download
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 </x-app-layout>
