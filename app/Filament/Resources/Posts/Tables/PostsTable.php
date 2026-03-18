@@ -23,7 +23,7 @@ class PostsTable
                 TextColumn::make('id')
                     ->sortable(),
                 TextColumn::make('user.name')
-                    ->label('Author')
+                    ->label('Name')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('content')
@@ -46,6 +46,7 @@ class PostsTable
                     ->dateTime('M d, Y h:i A')
                     ->sortable(),
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([
                 TrashedFilter::make(),
             ])
