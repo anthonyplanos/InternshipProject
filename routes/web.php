@@ -26,7 +26,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/posts', function (Request $request) {
         $validated = $request->validate([
             'content' => ['required', 'string', 'max:200'],
-            'attachment' => ['nullable', 'image', 'max:5120', 'mimes:jpg,jpeg,png,gif,webp'],
+            'attachment' => ['nullable', 'image', 'max:' . config('uploads.post_attachment_max_kb'), 'mimes:jpg,jpeg,png,gif,webp'],
         ]);
 
         $attachmentPath = $request->hasFile('attachment')

@@ -61,7 +61,7 @@
                         </div>
 
                         <div>
-                            <label for="attachment" class="mb-2 block text-sm font-medium text-slate-200">Image (optional)</label>
+                            <label for="attachment" class="mb-2 block text-sm font-medium text-slate-200">Image (optional, max {{ config('uploads.post_attachment_max_mb') }} MB)</label>
                             <input id="attachment" type="file" name="attachment" accept=".jpg,.jpeg,.png,.gif,.webp" class="block w-full rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-2 text-sm text-slate-200 file:me-4 file:rounded-lg file:border-0 file:bg-cyan-300 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-slate-900 hover:file:bg-cyan-200" />
                             @error('attachment')
                                 <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>

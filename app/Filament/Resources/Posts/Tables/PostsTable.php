@@ -12,6 +12,7 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Storage;
 
 class PostsTable
 {
@@ -30,8 +31,13 @@ class PostsTable
                     ->searchable(),
                 ImageColumn::make('attachment')
                     ->label('Image')
-                    ->url(fn ($record): ?string => $record->attachment ? asset('storage/' . $record->attachment) : null)
-                    ->height(60)
+                    ->getStateUsing(fn ($record): ?string => filled($record->attachment) && Storage::disk('public')->exists(ltrim($record->attachment, '/'))
+                        ? asset('storage/' . ltrim($record->attachment, '/'))
+                        : null)
+                    ->url(fn (?string $state): ?string => $state)
+                    ->openUrlInNewTab()
+                    ->imageSize(60)
+                    ->square()
                     ->width(80)
                     ->extraImgAttributes(['class' => 'rounded object-cover']),
                 TextColumn::make('created_at')
