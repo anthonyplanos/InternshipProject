@@ -47,8 +47,8 @@ class UserFactory extends Factory
     public function admin(): static
     {
         return $this->afterCreating(function (User $user): void {
-            Role::findOrCreate('admin', 'web');
-            $user->assignRole('admin');
+            Role::findOrCreate('Admin', 'web');
+            $user->assignRole('Admin');
         });
     }
 }

@@ -28,6 +28,7 @@ class PostsTable
                     ->sortable(),
                 TextColumn::make('content')
                     ->limit(80)
+                    ->wrap()
                     ->searchable(),
                 ImageColumn::make('attachment')
                     ->label('Image')

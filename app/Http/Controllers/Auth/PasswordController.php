@@ -24,6 +24,12 @@ class PasswordController extends Controller
             'password' => Hash::make($validated['password']),
         ]);
 
+        activity('account')
+            ->causedBy($request->user())
+            ->performedOn($request->user())
+            ->event('password_updated')
+            ->log('User updated account password');
+
         return back()->with('status', 'password-updated');
     }
 }

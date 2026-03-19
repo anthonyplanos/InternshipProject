@@ -17,8 +17,8 @@ class UserSeeder extends Seeder
     {
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
-        Role::findOrCreate('admin', 'web');
-        Role::findOrCreate('user', 'web');
+        Role::findOrCreate('Admin', 'web');
+        Role::findOrCreate('Employee', 'web');
 
         $admin = User::updateOrCreate([
             'email' => 'admin@example.com',
@@ -34,8 +34,8 @@ class UserSeeder extends Seeder
             'password' => Hash::make('password'),
         ]);
 
-        $admin->syncRoles(['admin']);
-        $testUser->syncRoles(['user']);
+        $admin->syncRoles(['Admin']);
+        $testUser->syncRoles(['Employee']);
 
         $targetUsers = 10;
         $currentUsers = User::query()->count();
@@ -44,7 +44,7 @@ class UserSeeder extends Seeder
             User::factory()
                 ->count($targetUsers - $currentUsers)
                 ->create()
-                ->each(fn (User $user) => $user->assignRole('user'));
+                ->each(fn (User $user) => $user->assignRole('Employee'));
         }
     }
 }
