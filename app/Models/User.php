@@ -6,6 +6,7 @@ namespace App\Models;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -48,6 +49,28 @@ class User extends Authenticatable implements FilamentUser
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::deleting(function (self $user): void {
+            if ($user->isForceDeleting()) {
+                $user->posts()->withTrashed()->forceDelete();
+
+                return;
+            }
+
+            $user->posts()->delete();
+        });
+
+        static::restoring(function (self $user): void {
+            $user->posts()->withTrashed()->restore();
+        });
+    }
+
+    public function posts(): HasMany
+    {
+        return $this->hasMany(Post::class);
     }
 
     public function isAdmin(): bool
