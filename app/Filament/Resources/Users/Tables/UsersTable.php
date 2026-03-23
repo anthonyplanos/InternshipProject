@@ -29,7 +29,7 @@ class UsersTable
                 TextColumn::make('password')
                     ->label('Password')
                     ->formatStateUsing(static fn (): string => '****'),
-                TextColumn::make('roles.name')
+                TextColumn::make('role')
                     ->label('Role')
                     ->badge()
                     ->searchable(),

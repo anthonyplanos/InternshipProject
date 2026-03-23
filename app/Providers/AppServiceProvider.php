@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Filament\Auth\LogoutResponse as CustomFilamentLogoutResponse;
+use Filament\Auth\Http\Responses\Contracts\LogoutResponse as FilamentLogoutResponse;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
@@ -15,7 +17,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(FilamentLogoutResponse::class, CustomFilamentLogoutResponse::class);
     }
 
     /**

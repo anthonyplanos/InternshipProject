@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Schema;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Permission\Traits\HasRoles;
@@ -17,7 +18,11 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, HasRoles, Notifiable, SoftDeletes, LogsActivity;
+    use HasFactory, HasRoles, Notifiable, SoftDeletes, LogsActivity {
+        HasRoles::assignRole as protected assignRoleFromTrait;
+        HasRoles::syncRoles as protected syncRolesFromTrait;
+        HasRoles::removeRole as protected removeRoleFromTrait;
+    }
 
     /**
      * The attributes that are mass assignable.
@@ -27,6 +32,7 @@ class User extends Authenticatable implements FilamentUser
     protected $fillable = [
         'name',
         'email',
+        'role',
         'password',
     ];
 
@@ -57,7 +63,7 @@ class User extends Authenticatable implements FilamentUser
     {
         return LogOptions::defaults()
             ->useLogName('account')
-            ->logOnly(['name', 'email'])
+            ->logOnly(['name', 'email', 'role'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
             ->setDescriptionForEvent(fn (string $eventName): string => "User account {$eventName}");
@@ -83,6 +89,46 @@ class User extends Authenticatable implements FilamentUser
     public function posts(): HasMany
     {
         return $this->hasMany(Post::class);
+    }
+
+    /**
+     * Persist a role snapshot on the users table so it is visible in DB tools.
+     */
+    public function syncRoleSnapshot(): void
+    {
+        if (! Schema::hasColumn('users', 'role')) {
+            return;
+        }
+
+        $roleName = $this->roles()->orderBy('roles.id')->value('name');
+
+        if ($this->role !== $roleName) {
+            $this->forceFill(['role' => $roleName])->saveQuietly();
+        }
+    }
+
+    public function assignRole(...$roles)
+    {
+        $result = $this->assignRoleFromTrait(...$roles);
+        $this->syncRoleSnapshot();
+
+        return $result;
+    }
+
+    public function syncRoles(...$roles)
+    {
+        $result = $this->syncRolesFromTrait(...$roles);
+        $this->syncRoleSnapshot();
+
+        return $result;
+    }
+
+    public function removeRole(...$role)
+    {
+        $result = $this->removeRoleFromTrait(...$role);
+        $this->syncRoleSnapshot();
+
+        return $result;
     }
 
     public function isAdmin(): bool

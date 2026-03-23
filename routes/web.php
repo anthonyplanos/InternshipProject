@@ -9,6 +9,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::redirect('/admin/login', '/login');
+Route::redirect('/admin/register', '/register');
+
 Route::get('/dashboard', function (Request $request) {
     if ($request->user()->isAdmin()) {
         return redirect('/admin');
