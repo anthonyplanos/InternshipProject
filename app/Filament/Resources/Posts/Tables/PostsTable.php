@@ -52,15 +52,21 @@ class PostsTable
                 TrashedFilter::make(),
             ])
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
+                EditAction::make()
+                    ->visible(fn (): bool => (bool) auth()->user()?->can('posts.manage')),
+                DeleteAction::make()
+                    ->visible(fn (): bool => (bool) auth()->user()?->can('posts.manage')),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                    ForceDeleteBulkAction::make(),
-                    RestoreBulkAction::make(),
-                ]),
+                    DeleteBulkAction::make()
+                        ->visible(fn (): bool => (bool) auth()->user()?->can('posts.manage')),
+                    ForceDeleteBulkAction::make()
+                        ->visible(fn (): bool => (bool) auth()->user()?->can('posts.manage')),
+                    RestoreBulkAction::make()
+                        ->visible(fn (): bool => (bool) auth()->user()?->can('posts.manage')),
+                ])
+                    ->visible(fn (): bool => (bool) auth()->user()?->can('posts.manage')),
             ]);
     }
 }

@@ -15,9 +15,12 @@ class EditPost extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
-            ForceDeleteAction::make(),
-            RestoreAction::make(),
+            DeleteAction::make()
+                ->visible(fn (): bool => (bool) auth()->user()?->can('posts.manage')),
+            ForceDeleteAction::make()
+                ->visible(fn (): bool => (bool) auth()->user()?->can('posts.manage')),
+            RestoreAction::make()
+                ->visible(fn (): bool => (bool) auth()->user()?->can('posts.manage')),
         ];
     }
 }

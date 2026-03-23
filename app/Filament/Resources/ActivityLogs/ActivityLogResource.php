@@ -9,6 +9,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Models\Activity;
 
 class ActivityLogResource extends Resource
@@ -47,5 +48,22 @@ class ActivityLogResource extends Resource
         return [
             'index' => ListActivityLogs::route('/'),
         ];
+    }
+
+    public static function canViewAny(): bool
+    {
+        return static::userCan('logs.view');
+    }
+
+    public static function canView(Model $record): bool
+    {
+        return static::userCan('logs.view');
+    }
+
+    protected static function userCan(string $permission): bool
+    {
+        $user = auth()->user();
+
+        return (bool) $user?->can($permission);
     }
 }

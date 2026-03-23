@@ -48,15 +48,21 @@ class UsersTable
                 TrashedFilter::make(),
             ])
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
+                EditAction::make()
+                    ->visible(fn (): bool => (bool) auth()->user()?->can('users.manage')),
+                DeleteAction::make()
+                    ->visible(fn (): bool => (bool) auth()->user()?->can('users.manage')),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                    ForceDeleteBulkAction::make(),
-                    RestoreBulkAction::make(),
-                ]),
+                    DeleteBulkAction::make()
+                        ->visible(fn (): bool => (bool) auth()->user()?->can('users.manage')),
+                    ForceDeleteBulkAction::make()
+                        ->visible(fn (): bool => (bool) auth()->user()?->can('users.manage')),
+                    RestoreBulkAction::make()
+                        ->visible(fn (): bool => (bool) auth()->user()?->can('users.manage')),
+                ])
+                    ->visible(fn (): bool => (bool) auth()->user()?->can('users.manage')),
             ]);
     }
 }

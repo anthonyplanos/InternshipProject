@@ -136,13 +136,18 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         return $this->hasRole('Admin');
     }
 
+    public function isStaff(): bool
+    {
+        return $this->hasRole('Staff');
+    }
+
     public function canAccessPanel(Panel $panel): bool
     {
-        return $panel->getId() === 'admin' && $this->isAdmin();
+        return $panel->getId() === 'admin' && $this->hasAnyRole(['Admin', 'Staff']);
     }
 
     public function getPostLoginRedirectPath(): string
     {
-        return $this->isAdmin() ? '/admin' : '/dashboard';
+        return $this->hasAnyRole(['Admin', 'Staff']) ? '/admin' : '/dashboard';
     }
 }

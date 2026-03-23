@@ -13,7 +13,8 @@ class ListPosts extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            CreateAction::make()
+                ->visible(fn (): bool => (bool) auth()->user()?->can('posts.manage')),
         ];
     }
 }
