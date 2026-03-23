@@ -25,7 +25,7 @@ Route::get('/dashboard', function (Request $request) {
     return view('dashboard', compact('posts'));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/posts', function (Request $request) {
         $validated = $request->validate([
             'content' => ['required', 'string', 'max:200'],
