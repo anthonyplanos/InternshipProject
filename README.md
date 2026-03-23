@@ -14,6 +14,19 @@ Laravel application with Breeze authentication, Filament admin panel, Spatie rol
 - Activity and audit logging
 - Soft deletes for posts
 
+### Admin View
+
+![Admin Dashboard](docs/screenshots/admin-dashboard.png)
+![Admin Dashboard](docs/screenshots/admin-dashboard-1.png)
+
+### Staff View
+
+![Staff Dashboard](docs/screenshots/staff-users-view.png)
+
+### Employee View
+
+![Employee Dashboard](docs/screenshots/employee-dashboard.png)
+
 ## Tech Stack
 
 - PHP / Laravel
