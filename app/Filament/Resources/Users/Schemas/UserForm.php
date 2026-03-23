@@ -24,6 +24,7 @@ class UserForm
                 TextInput::make('password')
                     ->password()
                     ->revealable()
+                    ->visible(fn (string $operation): bool => $operation === 'create')
                     ->required(fn (string $operation): bool => $operation === 'create')
                     ->minLength(8)
                     ->maxLength(255)
@@ -33,6 +34,7 @@ class UserForm
                     ->password()
                     ->revealable()
                     ->label('Confirm Password')
+                    ->visible(fn (string $operation): bool => $operation === 'create')
                     ->required(fn (string $operation): bool => $operation === 'create')
                     ->dehydrated(false),
                 Select::make('roles')
