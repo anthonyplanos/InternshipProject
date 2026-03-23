@@ -21,6 +21,17 @@ class ActivityLogsTable
                     ->sortable(),
                 TextColumn::make('event')
                     ->badge()
+                    ->color(fn (?string $state): string => match ($state) {
+                        'created' => 'success',
+                        'updated' => 'info',
+                        'deleted' => 'danger',
+                        'restored' => 'warning',
+                        'login' => 'success',
+                        'logout' => 'gray',
+                        'login_failed' => 'danger',
+                        'password_updated' => 'warning',
+                        default => 'primary',
+                    })
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('description')
@@ -52,6 +63,7 @@ class ActivityLogsTable
                     ->options([
                         'account' => 'Account',
                         'auth' => 'Authentication',
+                        'post' => 'Post',
                         'default' => 'Default',
                     ]),
                 SelectFilter::make('event')

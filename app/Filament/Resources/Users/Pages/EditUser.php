@@ -36,6 +36,19 @@ class EditUser extends EditRecord
                         'password' => $defaultPassword,
                     ])->save();
 
+                    activity('account')
+                        ->causedBy(auth()->user())
+                        ->performedOn($this->record)
+                        ->event('password_updated')
+                        ->withProperties([
+                            'source' => 'admin_reset',
+                            'ip' => request()->ip(),
+                            'target_user_id' => $this->record->id,
+                            'target_user_name' => $this->record->name,
+                            'target_user_email' => $this->record->email,
+                        ])
+                        ->log("Admin reset password for {$this->record->name} ({$this->record->email})");
+
                     Notification::make()
                         ->title('Password reset complete')
                         ->body('The user password was reset to the default password.')
