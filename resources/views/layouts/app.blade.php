@@ -22,7 +22,7 @@
 
             <!-- Page Heading -->
             @isset($header)
-                <header class="border-b border-white/10 bg-slate-900/70 backdrop-blur">
+                <header class="relative z-0 border-b border-white/10 bg-slate-900/70 backdrop-blur">
                     <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                         {{ $header }}
                     </div>
@@ -30,7 +30,7 @@
             @endisset
 
             <!-- Page Content -->
-            <main>
+            <main class="relative z-0">
                 {{ $slot }}
             </main>
         </div>

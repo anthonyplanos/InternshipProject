@@ -1,4 +1,4 @@
-<nav x-data="{ open: false }" class="border-b border-white/10 bg-slate-900/80 backdrop-blur">
+<nav x-data="{ open: false }" class="sticky top-0 z-1000 border-b border-white/10 bg-slate-900/80 backdrop-blur">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
@@ -19,7 +19,7 @@
             </div>
 
             <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
+            <div class="hidden sm:flex sm:items-center sm:ms-6 relative z-1001">
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm font-medium leading-4 text-slate-200 hover:bg-white/10 focus:outline-none transition ease-in-out duration-150">

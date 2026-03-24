@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
+        <div class="overflow-visible flex items-center justify-between">
             <div>
                 <p class="text-xs uppercase tracking-[0.2em] text-cyan-200">Company Feed</p>
                 <h2 class="mt-1 text-2xl font-bold text-cyan-200" style="font-family: 'Space Grotesk', sans-serif;">Idea Stream</h2>
