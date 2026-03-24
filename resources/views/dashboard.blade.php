@@ -14,6 +14,7 @@
         x-data="{
             modalOpen: false,
             imageUrl: '',
+            selectedAttachmentName: '',
             openImage(url) {
                 this.imageUrl = url;
                 this.modalOpen = true;
@@ -21,6 +22,16 @@
             closeImage() {
                 this.modalOpen = false;
                 this.imageUrl = '';
+            },
+            handleAttachmentChange(event) {
+                const file = event.target.files?.[0];
+                this.selectedAttachmentName = file ? file.name : '';
+            },
+            clearAttachment() {
+                if (this.$refs.attachmentInput) {
+                    this.$refs.attachmentInput.value = '';
+                }
+                this.selectedAttachmentName = '';
             }
         }"
         @keydown.escape.window="closeImage()"
@@ -62,7 +73,16 @@
 
                         <div>
                             <label for="attachment" class="mb-2 block text-sm font-medium text-slate-200">Image (optional, max {{ config('uploads.post_attachment_max_mb') }} MB)</label>
-                            <input id="attachment" type="file" name="attachment" accept=".jpg,.jpeg,.png,.gif,.webp" class="block w-full rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-2 text-sm text-slate-200 file:me-4 file:rounded-lg file:border-0 file:bg-cyan-300 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-slate-900 hover:file:bg-cyan-200" />
+                            <div class="rounded-xl border border-slate-700 bg-slate-950/60 px-3 py-2">
+                                <input x-ref="attachmentInput" @change="handleAttachmentChange($event)" id="attachment" type="file" name="attachment" accept=".jpg,.jpeg,.png,.gif,.webp" class="sr-only" />
+                                <div class="flex items-center gap-3">
+                                    <label for="attachment" class="shrink-0 cursor-pointer rounded-lg bg-cyan-300 px-3 py-1.5 text-xs font-semibold text-slate-900 transition hover:bg-cyan-200">Choose File</label>
+                                    <p class="min-w-0 flex-1 truncate text-sm text-slate-200" x-text="selectedAttachmentName || 'No file chosen'"></p>
+                                    <button x-show="selectedAttachmentName" x-transition.opacity type="button" @click="clearAttachment()" class="shrink-0 rounded-md border border-white/20 px-2 py-1 text-xs font-semibold text-slate-200 transition hover:bg-white/10" style="display: none;" aria-label="Clear selected image">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                            </div>
                             @error('attachment')
                                 <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
                             @enderror
@@ -81,7 +101,7 @@
                         <article class="rounded-2xl border border-white/10 bg-slate-900/80 p-5 shadow-xl shadow-cyan-950/20">
                             <div class="flex items-center justify-between gap-3">
                                 <div class="flex items-center gap-2">
-                                    <p class="text-sm font-semibold text-cyan-200">{{ $post->user->name ?? 'Unknown User' }}</p>
+                                    <p class="text-sm sm:text-base lg:text-lg font-semibold text-cyan-200">{{ $post->user->name ?? 'Unknown User' }}</p>
                                     @if (($post->user?->isAdmin()))
                                         <span class="rounded-full border border-amber-300/30 bg-amber-300/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-200">Admin</span>
                                     @endif
@@ -89,14 +109,14 @@
                                 <span class="text-xs text-slate-400">{{ $post->created_at?->diffForHumans() }}</span>
                             </div>
 
-                            <p class="mt-3 whitespace-pre-line text-sm leading-relaxed text-slate-200">{{ $post->content }}</p>
+                            <p class="mt-3 whitespace-pre-line text-sm sm:text-base lg:text-lg leading-relaxed text-slate-200">{{ $post->content }}</p>
 
                             @if ($post->attachment)
                                 <div class="mt-4">
                                     <button
                                         type="button"
                                         @click="openImage('{{ asset('storage/' . $post->attachment) }}')"
-                                        class="inline-flex items-center rounded-lg border border-cyan-300/30 bg-cyan-300/10 px-3 py-1.5 text-xs font-medium text-cyan-100 hover:bg-cyan-300/20"
+                                        class="inline-flex items-center rounded-xl bg-cyan-300 px-5 py-2.5 text-sm font-semibold text-slate-900 transition hover:bg-cyan-200"
                                     >
                                         View Image
                                     </button>

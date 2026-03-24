@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>{{ config('app.name', 'CollabHub') }}</title>
+        <title>{{ config('app.name', 'ShoreTalks') }}</title>
 
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=outfit:400,500,600,700|space-grotesk:500,700&display=swap" rel="stylesheet" />
@@ -18,8 +18,8 @@
 
             <header class="relative z-10 mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-6 lg:px-10">
                 <a href="{{ url('/') }}" class="inline-flex items-center gap-3">
-                    <span class="flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-300/40 bg-cyan-300/10 text-cyan-200">C</span>
-                    <span class="text-lg font-bold tracking-tight" style="font-family: 'Space Grotesk', sans-serif;">CollabHub</span>
+                    <span class="flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-300/40 bg-cyan-300/10 text-cyan-200">ST</span>
+                    <span class="text-lg font-bold tracking-tight" style="font-family: 'Space Grotesk', sans-serif;">ShoreTalks</span>
                 </a>
 
                 @if (Route::has('login'))
@@ -45,7 +45,7 @@
                         Better workplace decisions.
                     </h1>
                     <p class="mt-5 max-w-xl text-base leading-relaxed text-slate-300">
-                        CollabHub gives employees a safe internal space to post ideas, ask hard questions, and discuss proposals without social pressure.
+                        ShoreTalks gives employees a safe internal space to post ideas, ask hard questions, and discuss proposals without social pressure.
                     </p>
 
                     <div class="mt-8 flex flex-wrap items-center gap-4">

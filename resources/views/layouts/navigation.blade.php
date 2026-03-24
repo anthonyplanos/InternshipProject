@@ -20,7 +20,7 @@
 
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6 relative z-1001">
-                <x-dropdown align="right" width="48">
+                <x-dropdown align="right" width="48" contentClasses="py-1 bg-slate-900 border border-slate-700">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm font-medium leading-4 text-slate-200 hover:bg-white/10 focus:outline-none transition ease-in-out duration-150">
                             <div>{{ Auth::user()->name }}</div>
@@ -34,7 +34,7 @@
                     </x-slot>
 
                     <x-slot name="content">
-                        <x-dropdown-link :href="route('profile.edit')">
+                        <x-dropdown-link :href="route('profile.edit')" class="text-slate-200 hover:bg-white/10 focus:bg-white/10">
                             {{ __('Profile') }}
                         </x-dropdown-link>
 
@@ -42,7 +42,7 @@
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
 
-                            <x-dropdown-link :href="route('logout')"
+                            <x-dropdown-link :href="route('logout')" class="text-slate-200 hover:bg-white/10 focus:bg-white/10"
                                     onclick="event.preventDefault();
                                                 this.closest('form').submit();">
                                 {{ __('Log Out') }}
