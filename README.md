@@ -1,7 +1,7 @@
-<h1 align="center">InternshipProject</h1>
+<h1 align="center">ShoreTalks</h1>
 
 <p align="center">
-Laravel application with Breeze authentication, Filament admin panel, Spatie roles and permissions, Livewire components, and activity logging.
+ShoreTalks is an internal company collaboration and social platform where employees can share ideas, opinions, and interests to foster healthy discussion and teamwork. It emphasizes safe, anonymous idea-sharing to reduce pressure and protect identity while encouraging honest participation.
 </p>
 
 ---
@@ -13,6 +13,14 @@ Laravel application with Breeze authentication, Filament admin panel, Spatie rol
 - Roles and permissions with Spatie
 - Activity and audit logging
 - Soft deletes for posts
+
+## Project Description
+
+ShoreTalks is designed as an internal workplace platform to improve collaboration across teams. Employees can post suggestions, perspectives, and discussion points in a way that promotes respectful conversation and practical idea exchange.
+
+The platform puts strong focus on anonymous participation so users can speak more openly without fear of social pressure. This supports safer communication, more inclusive feedback, and healthier decision-making within the company.
+
+## Screenshots
 
 ### Admin View
 
