@@ -71,6 +71,12 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 
     protected static function booted(): void
     {
+        static::creating(function (self $user): void {
+            if (Schema::hasColumn('users', 'role') && empty($user->role)) {
+                $user->role = 'Employee';
+            }
+        });
+
         static::deleting(function (self $user): void {
             if ($user->isForceDeleting()) {
                 $user->posts()->withTrashed()->forceDelete();

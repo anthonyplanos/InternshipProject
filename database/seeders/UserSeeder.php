@@ -43,16 +43,18 @@ class UserSeeder extends Seeder
         $employeeRole->syncPermissions([]);
 
         $admin = User::updateOrCreate([
-            'email' => 'admin@example.com',
+            'email' => 'aplanos22-0551@cca.edu.ph',
         ], [
-            'name' => 'Admin',
+            'name' => 'Anthony',
+            'role' => 'Admin',
             'password' => Hash::make('password'),
         ]);
 
         $testUser = User::updateOrCreate([
-            'email' => 'test@example.com',
+            'email' => 'anthony.vshore360agency@gmail.com',
         ], [
-            'name' => 'Anthon',
+            'name' => 'Ton',
+            'role' => 'Employee',
             'password' => Hash::make('password'),
         ]);
 

@@ -45,6 +45,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return back()->with('status', 'Post published successfully.');
     })->name('posts.store');
 
+});
+
+Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
