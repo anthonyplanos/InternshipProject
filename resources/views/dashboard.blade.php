@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="overflow-visible flex items-center justify-between">
             <div>
-                <p class="text-xs uppercase tracking-[0.2em] text-cyan-200">Company Feed</p>
+                <p class="text-xs uppercase tracking-[0.2em] text-cyan-200">ShoreTalks</p>
                 <h2 class="mt-1 text-2xl font-bold text-cyan-200" style="font-family: 'Space Grotesk', sans-serif;">Idea Stream</h2>
             </div>
             <span class="rounded-full border border-emerald-300/30 bg-emerald-300/10 px-3 py-1 text-xs font-medium text-emerald-200">Anonymous Mode Active</span>

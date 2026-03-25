@@ -42,7 +42,7 @@
 
             <p class="text-center text-sm text-slate-300">
                 New employee?
-                <a href="{{ route('register') }}" class="font-semibold text-emerald-300 hover:text-emerald-200">Create your account</a>
+                <a href="{{ route('register') }}" class="font-semibold text-cyan-300 hover:text-cyan-200">Create your account</a>
             </p>
         </div>
     </form>

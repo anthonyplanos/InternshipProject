@@ -23,8 +23,8 @@
                 <div class="grid w-full overflow-hidden rounded-3xl border border-white/10 bg-slate-900/80 shadow-2xl shadow-cyan-900/30 backdrop-blur xl:grid-cols-2">
                     <section class="hidden border-r border-white/10 bg-gradient-to-br from-cyan-500/15 via-slate-900 to-emerald-500/10 p-10 xl:block">
                         <a href="{{ url('/') }}" class="inline-flex items-center gap-3">
-                            <span class="flex h-11 w-11 items-center justify-center rounded-xl border border-cyan-300/40 bg-cyan-300/10 text-lg font-bold text-cyan-200">C</span>
-                            <span class="text-xl font-bold tracking-tight" style="font-family: 'Space Grotesk', sans-serif;">CollabHub</span>
+                            <span class="flex h-11 w-11 items-center justify-center rounded-xl border border-cyan-300/40 bg-cyan-300/10 text-lg font-bold text-cyan-200">ST</span>
+                            <span class="text-xl font-bold tracking-tight" style="font-family: 'Space Grotesk', sans-serif;">ShoreTalks</span>
                         </a>
 
                         <h1 class="mt-12 text-4xl font-bold leading-tight text-white" style="font-family: 'Space Grotesk', sans-serif;">
