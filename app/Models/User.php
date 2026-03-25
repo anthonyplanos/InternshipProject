@@ -87,6 +87,33 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
             $user->posts()->delete();
         });
 
+        static::deleted(function (self $user): void {
+            if ($user->isForceDeleting()) {
+                return;
+            }
+
+            $originalEmail = (string) $user->email;
+            $timestamp = time();
+
+            if (str_contains($originalEmail, '@')) {
+                [$localPart, $domainPart] = explode('@', $originalEmail, 2);
+                $localPart = $localPart !== '' ? $localPart : 'deleted-user';
+                $domainPart = $domainPart !== '' ? $domainPart : 'deleted.local';
+                $anonymizedEmail = sprintf('%s*deleted+%d+%d@%s', $localPart, $user->getKey(), $timestamp, $domainPart);
+            } else {
+                $anonymizedEmail = sprintf('%s*deleted+%d+%d@deleted.local', $originalEmail !== '' ? $originalEmail : 'deleted-user', $user->getKey(), $timestamp);
+            }
+
+            static::withoutEvents(function () use ($user, $anonymizedEmail): void {
+                static::withoutGlobalScopes()
+                    ->whereKey($user->getKey())
+                    ->update([
+                        'email' => $anonymizedEmail,
+                        'email_verified_at' => null,
+                    ]);
+            });
+        });
+
         static::restoring(function (self $user): void {
             $user->posts()->withTrashed()->restore();
         });

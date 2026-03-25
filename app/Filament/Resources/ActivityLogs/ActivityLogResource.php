@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ActivityLogs;
 
+use App\Models\Activity;
 use App\Filament\Resources\ActivityLogs\Pages\ListActivityLogs;
 use App\Filament\Resources\ActivityLogs\Tables\ActivityLogsTable;
 use BackedEnum;
@@ -10,7 +11,6 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Activitylog\Models\Activity;
 
 class ActivityLogResource extends Resource
 {

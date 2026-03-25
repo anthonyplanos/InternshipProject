@@ -28,8 +28,8 @@ class Post extends Model
             ->setDescriptionForEvent(fn (string $eventName): string => "Post {$eventName}");
     }
 
-    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function user()
     {
-        return $this->belongsTo(\App\Models\User::class);
+        return $this->belongsTo(\App\Models\User::class)->withTrashed();
     }
 }
