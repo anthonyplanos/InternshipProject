@@ -26,11 +26,6 @@
                     <nav class="flex items-center gap-3">
                         @auth
                             <a href="{{ route('dashboard') }}" class="rounded-xl border border-cyan-300/40 bg-cyan-300/10 px-4 py-2 text-sm font-medium text-cyan-100 hover:bg-cyan-300/20">Open Feed</a>
-                        @else
-                            <a href="{{ route('login') }}" class="rounded-xl border border-white/20 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-white/10">Login</a>
-                            @if (Route::has('register'))
-                                <a href="{{ route('register') }}" class="rounded-xl bg-cyan-300 px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-cyan-200">Register</a>
-                            @endif
                         @endauth
                     </nav>
                 @endif
@@ -49,8 +44,8 @@
                     </p>
 
                     <div class="mt-8 flex flex-wrap items-center gap-4">
-                        <a href="{{ route('register') }}" class="rounded-2xl bg-cyan-300 px-6 py-3 text-sm font-semibold text-slate-900 hover:bg-cyan-200">Create Account</a>
-                        <a href="{{ route('login') }}" class="rounded-2xl border border-white/20 px-6 py-3 text-sm font-medium text-slate-100 hover:bg-white/10">Sign In</a>
+                        <a href="{{ route('register') }}" class="rounded-2xl bg-cyan-300 px-6 py-3 text-sm font-semibold text-slate-900 hover:bg-cyan-200">Register</a>
+                        <a href="{{ route('login') }}" class="rounded-2xl border border-white/20 px-6 py-3 text-sm font-medium text-slate-100 hover:bg-white/10">Login</a>
                     </div>
                 </section>
 

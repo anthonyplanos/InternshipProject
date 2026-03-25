@@ -16,7 +16,7 @@
     >{{ __('Delete Account') }}</x-danger-button>
 
     <x-modal name="confirm-user-deletion" :show="$errors->userDeletion->isNotEmpty()" focusable>
-        <form method="post" action="{{ route('profile.destroy') }}" class="rounded-2xl border border-white/10 bg-slate-900/95 p-6 text-slate-100">
+        <form method="post" action="{{ route('profile.destroy') }}" class="space-y-6 rounded-2xl border border-white/10 bg-slate-900/80 p-6 text-slate-100 shadow-xl shadow-cyan-950/20">
             @csrf
             @method('delete')
 
@@ -35,7 +35,7 @@
                     id="password"
                     name="password"
                     type="password"
-                    class="mt-1 block w-3/4 rounded-xl border-slate-700 bg-slate-950/60 text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:ring-cyan-300/40"
+                    class="mt-1 block w-full rounded-xl border-slate-700 bg-slate-950/60 text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:ring-cyan-300/40"
                     placeholder="{{ __('Password') }}"
                 />
 
@@ -43,7 +43,7 @@
             </div>
 
             <div class="mt-6 flex justify-end">
-                <x-secondary-button x-on:click="$dispatch('close')" class="rounded-xl border border-white/15 bg-slate-800/80 text-slate-100 hover:bg-slate-700/80 focus:ring-cyan-300/60 focus:ring-offset-slate-900">
+                <x-secondary-button x-on:click="$dispatch('close')" class="rounded-xl border border-slate-600/60 bg-slate-700/70 text-slate-50 hover:bg-slate-600/80 focus:ring-cyan-300/60 focus:ring-offset-slate-900">
                     {{ __('Cancel') }}
                 </x-secondary-button>
 
