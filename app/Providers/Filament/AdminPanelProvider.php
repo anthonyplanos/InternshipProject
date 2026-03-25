@@ -7,6 +7,7 @@ use App\Http\Middleware\FilamentAuthenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Enums\ThemeMode;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -29,6 +30,8 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->brandName('ShoreTalks')
+            ->darkMode(isForced: true)
+            ->defaultThemeMode(ThemeMode::Dark)
             ->colors([
                 'primary' => Color::Cyan,
                 'gray' => Color::Slate,

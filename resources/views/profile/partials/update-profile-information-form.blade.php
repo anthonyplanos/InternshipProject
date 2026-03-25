@@ -1,10 +1,10 @@
 <section>
     <header>
-        <h2 class="text-lg font-medium text-gray-900">
+        <h2 class="text-lg font-semibold text-cyan-200" style="font-family: 'Space Grotesk', sans-serif;">
             {{ __('Profile Information') }}
         </h2>
 
-        <p class="mt-1 text-sm text-gray-600">
+        <p class="mt-1 text-sm text-slate-300">
             {{ __("Update your account's profile information and email address.") }}
         </p>
     </header>
@@ -18,28 +18,28 @@
         @method('patch')
 
         <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $user->name)" required autofocus autocomplete="name" />
-            <x-input-error class="mt-2" :messages="$errors->get('name')" />
+            <x-input-label for="name" :value="__('Name')" class="text-slate-200" />
+            <x-text-input id="name" name="name" type="text" class="mt-1 block w-full rounded-xl border-slate-700 bg-slate-950/60 text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:ring-cyan-300/40" :value="old('name', $user->name)" required autofocus autocomplete="name" />
+            <x-input-error class="mt-2 text-rose-300" :messages="$errors->get('name')" />
         </div>
 
         <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="old('email', $user->email)" required autocomplete="username" />
-            <x-input-error class="mt-2" :messages="$errors->get('email')" />
+            <x-input-label for="email" :value="__('Email')" class="text-slate-200" />
+            <x-text-input id="email" name="email" type="email" class="mt-1 block w-full rounded-xl border-slate-700 bg-slate-950/60 text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:ring-cyan-300/40" :value="old('email', $user->email)" required autocomplete="username" />
+            <x-input-error class="mt-2 text-rose-300" :messages="$errors->get('email')" />
 
             @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
                 <div>
-                    <p class="text-sm mt-2 text-gray-800">
+                    <p class="mt-2 text-sm text-slate-200">
                         {{ __('Your email address is unverified.') }}
 
-                        <button form="send-verification" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <button form="send-verification" class="rounded-md text-sm font-medium text-cyan-300 underline hover:text-cyan-200 focus:outline-none focus:ring-2 focus:ring-cyan-300/70 focus:ring-offset-2 focus:ring-offset-slate-900">
                             {{ __('Click here to re-send the verification email.') }}
                         </button>
                     </p>
 
                     @if (session('status') === 'verification-link-sent')
-                        <p class="mt-2 font-medium text-sm text-green-600">
+                        <p class="mt-2 text-sm font-medium text-emerald-300">
                             {{ __('A new verification link has been sent to your email address.') }}
                         </p>
                     @endif
@@ -48,7 +48,7 @@
         </div>
 
         <div class="flex items-center gap-4">
-            <x-primary-button>{{ __('Save') }}</x-primary-button>
+            <x-primary-button class="rounded-xl bg-cyan-300 px-4 py-2 text-slate-900 hover:bg-cyan-200 focus:bg-cyan-200 active:bg-cyan-300 focus:ring-cyan-300/70 focus:ring-offset-slate-900">{{ __('Save') }}</x-primary-button>
 
             @if (session('status') === 'profile-updated')
                 <p
@@ -56,7 +56,7 @@
                     x-show="show"
                     x-transition
                     x-init="setTimeout(() => show = false, 2000)"
-                    class="text-sm text-gray-600"
+                    class="text-sm text-slate-300"
                 >{{ __('Saved.') }}</p>
             @endif
         </div>
