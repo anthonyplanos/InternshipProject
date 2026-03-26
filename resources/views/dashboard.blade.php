@@ -65,7 +65,8 @@
 
                         <div>
                             <label for="content" class="mb-2 block text-sm font-medium text-slate-200">Your Post</label>
-                            <textarea id="content" name="content" rows="5" maxlength="1200" required class="block w-full rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-300/40" placeholder="What should we improve as a company?"></textarea>
+                            <textarea id="content" name="content" rows="5" maxlength="400" required class="block w-full rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-300/40" placeholder="What should we improve as a company?"></textarea>
+                            <p class="mt-2 text-xs text-slate-400">Maximum 400 characters.</p>
                             @error('content')
                                 <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
                             @enderror
@@ -98,7 +99,11 @@
 
                 <div class="space-y-4">
                     @forelse ($posts as $post)
-                        <article class="rounded-2xl border border-white/10 bg-slate-900/80 p-5 shadow-xl shadow-cyan-950/20">
+                        <article
+                            x-data="{ expanded: false, truncatable: false }"
+                            x-init="$nextTick(() => { truncatable = $refs.content.scrollHeight > 112; })"
+                            class="rounded-2xl border border-white/10 bg-slate-900/80 p-5 shadow-xl shadow-cyan-950/20"
+                        >
                             <div class="flex items-center justify-between gap-3">
                                 <div class="flex items-center gap-2">
                                     <p class="text-sm sm:text-base lg:text-lg font-semibold text-cyan-200">{{ $post->user->name ?? 'Unknown User' }}</p>
@@ -109,7 +114,22 @@
                                 <span class="text-xs text-slate-400">{{ $post->created_at?->diffForHumans() }}</span>
                             </div>
 
-                            <p class="mt-3 whitespace-pre-line text-sm sm:text-base lg:text-lg leading-relaxed text-slate-200">{{ $post->content }}</p>
+                            <p
+                                x-ref="content"
+                                class="mt-3 max-w-full whitespace-pre-line wrap-anywhere text-sm sm:text-base lg:text-lg leading-relaxed text-slate-200"
+                                :class="{ 'max-h-28 overflow-hidden': truncatable && !expanded }"
+                            >{{ $post->content }}</p>
+
+                            <button
+                                x-show="truncatable"
+                                x-cloak
+                                type="button"
+                                @click="expanded = !expanded"
+                                class="mt-2 text-xs font-semibold text-cyan-200 underline underline-offset-2 hover:text-cyan-100"
+                            >
+                                <span x-show="!expanded">See more</span>
+                                <span x-show="expanded">See less</span>
+                            </button>
 
                             @if ($post->attachment)
                                 <div class="mt-4">

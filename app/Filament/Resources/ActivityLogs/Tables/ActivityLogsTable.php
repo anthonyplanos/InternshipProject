@@ -34,6 +34,7 @@ class ActivityLogsTable
                         'logout' => 'gray',
                         'login_failed' => 'danger',
                         'password_updated' => 'warning',
+                        'role_updated' => 'info',
                         default => 'primary',
                     })
                     ->searchable()
@@ -162,6 +163,7 @@ class ActivityLogsTable
                         'logout' => 'Logout',
                         'login_failed' => 'Failed Login',
                         'password_updated' => 'Password Updated',
+                        'role_updated' => 'Role Updated',
                     ]),
             ])
             ->recordActions([])

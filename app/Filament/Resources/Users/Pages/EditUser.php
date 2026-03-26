@@ -14,9 +14,36 @@ class EditUser extends EditRecord
 {
     protected static string $resource = UserResource::class;
 
+    protected ?string $roleBeforeSave = null;
+
+    protected function beforeSave(): void
+    {
+        $this->roleBeforeSave = $this->record->roles()->orderBy('roles.id')->value('name');
+    }
+
     protected function afterSave(): void
     {
         $this->record->syncRoleSnapshot();
+
+        $roleAfterSave = $this->record->roles()->orderBy('roles.id')->value('name');
+
+        if (strcasecmp((string) $this->roleBeforeSave, (string) $roleAfterSave) !== 0) {
+            activity('account')
+                ->causedBy(auth()->user())
+                ->performedOn($this->record)
+                ->event('role_updated')
+                ->withProperties([
+                    'source' => 'admin_role_update',
+                    'ip' => request()->ip(),
+                    'target_user_id' => $this->record->id,
+                    'old_role' => $this->roleBeforeSave,
+                    'new_role' => $roleAfterSave,
+                ])
+                ->log("Admin changed role from "
+                    . ($this->roleBeforeSave ?? 'none')
+                    . ' to '
+                    . ($roleAfterSave ?? 'none'));
+        }
     }
 
     protected function getHeaderActions(): array

@@ -28,7 +28,7 @@ Route::get('/dashboard', function (Request $request) {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/posts', function (Request $request) {
         $validated = $request->validate([
-            'content' => ['required', 'string', 'max:200'],
+            'content' => ['required', 'string', 'max:400'],
             'attachment' => ['nullable', 'image', 'max:' . config('uploads.post_attachment_max_kb'), 'mimes:jpg,jpeg,png,gif,webp'],
         ]);
 

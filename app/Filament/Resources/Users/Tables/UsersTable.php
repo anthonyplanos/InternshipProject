@@ -27,9 +27,6 @@ class UsersTable
                 TextColumn::make('email')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('password')
-                    ->label('Password')
-                    ->formatStateUsing(static fn (): string => '****'),
                 TextColumn::make('role')
                     ->label('Role')
                     ->badge()
