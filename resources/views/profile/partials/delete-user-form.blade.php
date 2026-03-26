@@ -31,10 +31,9 @@
             <div class="mt-6">
                 <x-input-label for="password" value="{{ __('Password') }}" class="sr-only" />
 
-                <x-text-input
+                <x-password-input
                     id="password"
                     name="password"
-                    type="password"
                     class="mt-1 block w-full rounded-xl border-slate-700 bg-slate-950/60 text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:ring-cyan-300/40"
                     placeholder="{{ __('Password') }}"
                 />
@@ -43,7 +42,7 @@
             </div>
 
             <div class="mt-6 flex justify-end">
-                <x-secondary-button x-on:click="$dispatch('close')" class="rounded-xl border border-slate-600/60 bg-slate-700/70 text-slate-50 hover:bg-slate-600/80 focus:ring-cyan-300/60 focus:ring-offset-slate-900">
+                <x-secondary-button x-on:click="$dispatch('close')" class="rounded-xl border border-slate-600/60 bg-slate-700/70 text-slate-400 hover:bg-slate-600/80 focus:ring-cyan-300/60 focus:ring-offset-slate-900">
                     {{ __('Cancel') }}
                 </x-secondary-button>
 

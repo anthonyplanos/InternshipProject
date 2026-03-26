@@ -23,13 +23,13 @@
 
         <div>
             <label for="password" class="mb-2 block text-sm font-medium text-slate-200">Password</label>
-            <input id="password" class="block w-full rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-300/40" type="password" name="password" required autocomplete="new-password" placeholder="Create a secure password" />
+            <x-password-input id="password" class="block w-full rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-300/40" name="password" required autocomplete="new-password" placeholder="Create a secure password" />
             <x-input-error :messages="$errors->get('password')" class="mt-2 text-sm text-rose-300" />
         </div>
 
         <div>
             <label for="password_confirmation" class="mb-2 block text-sm font-medium text-slate-200">Confirm Password</label>
-            <input id="password_confirmation" class="block w-full rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-300/40" type="password" name="password_confirmation" required autocomplete="new-password" placeholder="Repeat your password" />
+            <x-password-input id="password_confirmation" class="block w-full rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-300/40" name="password_confirmation" required autocomplete="new-password" placeholder="Repeat your password" />
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2 text-sm text-rose-300" />
         </div>
 

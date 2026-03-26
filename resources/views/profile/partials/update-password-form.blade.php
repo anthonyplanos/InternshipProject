@@ -24,19 +24,19 @@
 
         <div>
             <x-input-label for="update_password_current_password" :value="__('Current Password')" class="text-slate-200" />
-            <x-text-input id="update_password_current_password" name="current_password" type="password" class="mt-1 block w-full rounded-xl border-slate-700 bg-slate-950/60 text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:ring-cyan-300/40" autocomplete="current-password" x-model="currentPassword" />
+            <x-password-input id="update_password_current_password" name="current_password" class="mt-1 block w-full rounded-xl border-slate-700 bg-slate-950/60 text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:ring-cyan-300/40" autocomplete="current-password" x-model="currentPassword" />
             <x-input-error :messages="$errors->updatePassword->get('current_password')" class="mt-2 text-rose-300" />
         </div>
 
         <div>
             <x-input-label for="update_password_password" :value="__('New Password')" class="text-slate-200" />
-            <x-text-input id="update_password_password" name="password" type="password" class="mt-1 block w-full rounded-xl border-slate-700 bg-slate-950/60 text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:ring-cyan-300/40" autocomplete="new-password" x-model="newPassword" />
+            <x-password-input id="update_password_password" name="password" class="mt-1 block w-full rounded-xl border-slate-700 bg-slate-950/60 text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:ring-cyan-300/40" autocomplete="new-password" x-model="newPassword" />
             <x-input-error :messages="$errors->updatePassword->get('password')" class="mt-2 text-rose-300" />
         </div>
 
         <div>
             <x-input-label for="update_password_password_confirmation" :value="__('Confirm Password')" class="text-slate-200" />
-            <x-text-input id="update_password_password_confirmation" name="password_confirmation" type="password" class="mt-1 block w-full rounded-xl border-slate-700 bg-slate-950/60 text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:ring-cyan-300/40" autocomplete="new-password" x-model="confirmPassword" />
+            <x-password-input id="update_password_password_confirmation" name="password_confirmation" class="mt-1 block w-full rounded-xl border-slate-700 bg-slate-950/60 text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:ring-cyan-300/40" autocomplete="new-password" x-model="confirmPassword" />
             <x-input-error :messages="$errors->updatePassword->get('password_confirmation')" class="mt-2 text-rose-300" />
         </div>
 
