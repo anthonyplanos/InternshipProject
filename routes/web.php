@@ -49,6 +49,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::post('/profile/email/verification-notification', [ProfileController::class, 'sendPendingEmailVerification'])
+        ->middleware('throttle:6,1')
+        ->name('profile.email.verification.send');
+    Route::get('/profile/email/verify/{id}/{hash}', [ProfileController::class, 'verifyPendingEmail'])
+        ->middleware(['signed', 'throttle:6,1'])
+        ->name('profile.email.verify');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });

@@ -32,6 +32,8 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     protected $fillable = [
         'name',
         'email',
+        'pending_email',
+        'pending_email_verified_at',
         'role',
         'password',
     ];
@@ -55,6 +57,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     {
         return [
             'email_verified_at' => 'datetime',
+            'pending_email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
     }
