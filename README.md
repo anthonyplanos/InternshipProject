@@ -82,6 +82,7 @@ cd InternshipProject
 2. Install backend and frontend dependencies
 
 ```bash
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass 
 composer install
 npm install
 ```
@@ -131,7 +132,16 @@ php artisan key:generate
 php artisan migrate
 ```
 
-8. Run the app
+8. Seed dummy data (required order)
+
+Run these commands in order to avoid seeder dependency errors:
+
+```bash
+php artisan db:seed --class=UserSeeder
+php artisan db:seed
+```
+
+9. Run the app
 
 Option A (single command):
 
@@ -193,6 +203,45 @@ npm run dev
 - Roles, permissions, Filament, and activity log dependencies are installed through Composer.
 - Default MySQL port for XAMPP is 3306.
 
+## Common Database Run Commands:
+
+```bash
+php artisan migrate
+php artisan db:seed
+php artisan db:seed --class=UserSeeder
+php artisan migrate:fresh --seed
+```
+
+## Common Issues
+
+1. Vite manifest not found
+
+Run:
+
+```bash
+npm run dev
+```
+
+2. SQLSTATE access denied
+
+Recheck DB_DATABASE, DB_USERNAME, DB_PASSWORD, and DB_PORT in .env.
+
+3. Class or cache issues after pulling changes
+
+Run:
+
+```bash
+php artisan optimize:clear
+```
+
+4. APP_KEY missing
+
+Run:
+
+```bash
+php artisan key:generate
+```
+
 ## Package Install Commands (For New Laravel Projects)
 
 Run these from your project root:
@@ -248,43 +297,4 @@ php artisan make:policy PostPolicy --model=Post
 
 # Filament resource (if Filament is installed)
 php artisan make:filament-resource Post
-```
-
-Common database run commands:
-
-```bash
-php artisan migrate
-php artisan db:seed
-php artisan db:seed --class=PostSeeder
-php artisan migrate:fresh --seed
-```
-
-## Common Issues
-
-1. Vite manifest not found
-
-Run:
-
-```bash
-npm run dev
-```
-
-2. SQLSTATE access denied
-
-Recheck DB_DATABASE, DB_USERNAME, DB_PASSWORD, and DB_PORT in .env.
-
-3. Class or cache issues after pulling changes
-
-Run:
-
-```bash
-php artisan optimize:clear
-```
-
-4. APP_KEY missing
-
-Run:
-
-```bash
-php artisan key:generate
 ```
