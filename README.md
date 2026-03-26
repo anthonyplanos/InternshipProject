@@ -55,27 +55,35 @@ Install these first:
 
 Check your versions:
 
-	php -v
-	composer -V
-	node -v
-	npm -v
-	mysql --version
+```bash
+php -v
+composer -V
+node -v
+npm -v
+mysql --version
+```
 
 ## Quick Start (Windows / XAMPP Friendly)
 
 1. Clone the repository
 
-	git clone https://github.com/anthonyplanos/InternshipProject.git
-	cd InternshipProject
+```bash
+git clone https://github.com/anthonyplanos/InternshipProject.git
+cd InternshipProject
+```
 
 2. Install backend and frontend dependencies
 
-	composer install
-	npm install
+```bash
+composer install
+npm install
+```
 
 3. Create your environment file
 
-	copy .env.example .env
+```bash
+copy .env.example .env
+```
 
 4. Create a MySQL database
 
@@ -96,35 +104,111 @@ Update these values to match your local database:
 
 6. Run Laravel setup
 
-	php artisan key:generate
-	php artisan migrate
+```bash
+php artisan key:generate
+php artisan migrate
+```
 
 7. Run the app
 
 In terminal 1:
 
-	php artisan serve
+```bash
+php artisan serve
+```
 
 In terminal 2:
 
-	npm run dev
+```bash
+npm run dev
+```
 
 Open: http://127.0.0.1:8000
 
 ## Quick Start (macOS / Linux)
 
-	git clone https://github.com/anthonyplanos/InternshipProject.git
-	cd InternshipProject
-	composer install
-	npm install
-	cp .env.example .env
-	php artisan key:generate
+```bash
+git clone https://github.com/anthonyplanos/InternshipProject.git
+cd InternshipProject
+composer install
+npm install
+cp .env.example .env
+php artisan key:generate
+```
 
 Then configure database values in .env and run:
 
-	php artisan migrate
-	php artisan serve
-	npm run dev
+```bash
+php artisan migrate
+php artisan serve
+npm run dev
+```
+
+## Package Install Commands (New Project Reference)
+
+Run these from your project root:
+
+```bash
+# Livewire
+composer require livewire/livewire
+
+# Filament v3
+composer require filament/filament:"^3.0" -W
+php artisan filament:install --panels
+
+# Spatie Permission
+composer require spatie/laravel-permission
+php artisan vendor:publish --provider="Spatie\Permission\PermissionServiceProvider"
+php artisan migrate
+
+# Spatie Activity Log
+composer require spatie/laravel-activitylog
+php artisan vendor:publish --provider="Spatie\Activitylog\ActivitylogServiceProvider" --tag="activitylog-migrations"
+php artisan migrate
+```
+
+## Laravel Make Commands (Seeder, Model, Factory, and more)
+
+```bash
+# Model only
+php artisan make:model Post
+
+# Model + migration + factory + seeder
+php artisan make:model Post -mfs
+
+# Model + migration + factory + seeder + controller
+php artisan make:model Post -mfsc
+
+# Seeder
+php artisan make:seeder PostSeeder
+
+# Factory (linked to model)
+php artisan make:factory PostFactory --model=Post
+
+# Migration
+php artisan make:migration create_posts_table
+
+# Controller (resource)
+php artisan make:controller PostController --resource
+
+# Form request
+php artisan make:request StorePostRequest
+
+# Policy
+php artisan make:policy PostPolicy --model=Post
+
+# Filament resource (if Filament is installed)
+php artisan make:filament-resource Post
+```
+
+Common database run commands:
+
+```bash
+php artisan migrate
+php artisan db:seed
+php artisan db:seed --class=PostSeeder
+php artisan migrate:fresh --seed
+```
 
 ## Common Issues
 
@@ -132,7 +216,9 @@ Then configure database values in .env and run:
 
 Run:
 
-	npm run dev
+```bash
+npm run dev
+```
 
 2. SQLSTATE access denied
 
@@ -142,19 +228,25 @@ Recheck DB_DATABASE, DB_USERNAME, DB_PASSWORD, and DB_PORT in .env.
 
 Run:
 
-	php artisan optimize:clear
+```bash
+php artisan optimize:clear
+```
 
 4. APP_KEY missing
 
 Run:
 
-	php artisan key:generate
+```bash
+php artisan key:generate
+```
 
 ## Useful Commands
 
-	php artisan migrate:fresh --seed
-	php artisan test
-	php artisan optimize:clear
+```bash
+php artisan migrate:fresh --seed
+php artisan test
+php artisan optimize:clear
+```
 
 ## Notes
 
