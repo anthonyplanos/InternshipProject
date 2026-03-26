@@ -1,7 +1,7 @@
 <x-guest-layout>
     <div>
         <p class="text-sm uppercase tracking-[0.2em] text-cyan-300">Employee Access</p>
-        <h2 class="mt-3 text-3xl font-bold text-cyan-200" style="font-family: 'Space Grotesk', sans-serif;">Sign in to ShoreTalks</h2>
+        <h2 class="mt-3 text-3xl font-bold text-cyan-200" style="font-family: 'Space Grotesk', sans-serif;">Sign in to {{ config('app.name') }}</h2>
         <p class="mt-2 text-sm text-slate-300">Use your work email to access the anonymous discussion platform.</p>
     </div>
 

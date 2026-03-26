@@ -29,7 +29,10 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            ->brandName('ShoreTalks')
+            ->favicon(asset('images/logo.png'))
+            ->brandLogo(fn () => view('filament.components.brand-logo'))
+            ->brandLogoHeight('1.5rem')
+            ->brandName(config('app.name'))
             ->darkMode(isForced: true)
             ->defaultThemeMode(ThemeMode::Dark)
             ->colors([
