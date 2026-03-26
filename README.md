@@ -13,6 +13,9 @@ ShoreTalks is an internal company collaboration and social platform where employ
 - Roles and permissions with Spatie
 - Activity and audit logging
 - Soft deletes for posts
+- Pending email change verification workflow
+- Role-based access control for Admin, Staff, and Employee views
+- Searchable activity history for user and content changes
 
 ## Project Description
 
@@ -37,11 +40,15 @@ The platform puts strong focus on anonymous participation so users can speak mor
 
 ## Tech Stack
 
-- PHP / Laravel
+- PHP 8.2+
+- Laravel 12
 - MySQL
-- Vite + NPM
-- Tailwind CSS
-- Livewire
+- Filament 3
+- Livewire 3
+- Spatie Laravel Permission
+- Spatie Laravel Activitylog
+- Tailwind CSS 4
+- Vite 7 + NPM
 
 ## Prerequisites
 
@@ -95,21 +102,44 @@ copy .env.example .env
 
 Update these values to match your local database:
 
-	DB_CONNECTION=mysql
-	DB_HOST=127.0.0.1
-	DB_PORT=3306
-	DB_DATABASE=internship_project
-	DB_USERNAME=root
-	DB_PASSWORD=
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=internship_project
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
-6. Run Laravel setup
+6. Configure mail values in .env (required for email verification)
+
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=127.0.0.1
+MAIL_PORT=1025
+MAIL_USERNAME=null
+MAIL_PASSWORD=null
+MAIL_ENCRYPTION=null
+MAIL_FROM_ADDRESS="noreply@example.com"
+MAIL_FROM_NAME="${APP_NAME}"
+```
+
+7. Run Laravel setup
 
 ```bash
 php artisan key:generate
 php artisan migrate
 ```
 
-7. Run the app
+8. Run the app
+
+Option A (single command):
+
+```bash
+composer run dev
+```
+
+Option B (separate terminals):
 
 In terminal 1:
 
@@ -138,13 +168,32 @@ php artisan key:generate
 
 Then configure database values in .env and run:
 
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=127.0.0.1
+MAIL_PORT=1025
+MAIL_USERNAME=null
+MAIL_PASSWORD=null
+MAIL_ENCRYPTION=null
+MAIL_FROM_ADDRESS="noreply@example.com"
+MAIL_FROM_NAME="${APP_NAME}"
+```
+
+Then run:
+
 ```bash
 php artisan migrate
 php artisan serve
 npm run dev
 ```
 
-## Package Install Commands (New Project Reference)
+## Notes
+
+- All required packages are already defined in composer.json and package.json.
+- Roles, permissions, Filament, and activity log dependencies are installed through Composer.
+- Default MySQL port for XAMPP is 3306.
+
+## Package Install Commands (For New Laravel Projects)
 
 Run these from your project root:
 
@@ -239,21 +288,3 @@ Run:
 ```bash
 php artisan key:generate
 ```
-
-## Useful Commands
-
-```bash
-php artisan migrate:fresh --seed
-php artisan test
-php artisan optimize:clear
-```
-
-## Notes
-
-- All required packages are already defined in composer.json and package.json.
-- Roles, permissions, Filament, and activity log dependencies are installed through Composer.
-- Default MySQL port for XAMPP is 3306.
-
-## License
-
-This project is open-sourced software licensed under the MIT license.
