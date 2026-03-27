@@ -100,7 +100,7 @@
                 <div class="space-y-4">
                     @forelse ($posts as $post)
                         <article
-                            x-data="{ expanded: false, truncatable: false }"
+                            x-data="{ expanded: false, truncatable: false, menuOpen: false, editing: false, editContent: @js($post->content), originalContent: @js($post->content) }"
                             x-init="$nextTick(() => { truncatable = $refs.content.scrollHeight > 112; })"
                             class="rounded-2xl border border-white/10 bg-slate-900/80 p-5 shadow-xl shadow-cyan-950/20"
                         >
@@ -111,25 +111,113 @@
                                         <span class="rounded-full border border-amber-300/30 bg-amber-300/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-200">Admin</span>
                                     @endif
                                 </div>
-                                <span class="text-xs text-slate-400">{{ $post->created_at?->diffForHumans() }}</span>
+                                <div class="flex items-center gap-3">
+                                    <span class="text-xs text-slate-400">{{ $post->created_at?->diffForHumans() }}</span>
+
+                                    @if ((int) $post->user_id === (int) Auth::id())
+                                        <div class="relative" @click.outside="menuOpen = false">
+                                            <button
+                                                type="button"
+                                                @click="menuOpen = !menuOpen"
+                                                class="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-300/90 transition hover:bg-white/10 hover:text-cyan-200 focus:outline-none focus:ring-2 focus:ring-cyan-300/60"
+                                                aria-label="Post options"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4.5 w-4.5" aria-hidden="true">
+                                                    <path d="M10 4.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm0 7a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm0 7a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" />
+                                                </svg>
+                                            </button>
+
+                                            <div
+                                                x-show="menuOpen"
+                                                x-transition.opacity
+                                                class="absolute right-0 z-20 mt-2 w-36 rounded-xl border border-white/10 bg-slate-900/95 p-1.5 shadow-xl shadow-cyan-950/30"
+                                                style="display: none;"
+                                            >
+                                                <button
+                                                    type="button"
+                                                    @click="editing = true; menuOpen = false; $nextTick(() => $refs.editContent.focus())"
+                                                    class="w-full rounded-lg px-3 py-2 text-left text-xs font-semibold text-cyan-200 transition hover:bg-white/10"
+                                                >
+                                                    Edit
+                                                </button>
+
+                                                <form method="POST" action="{{ route('posts.destroy', $post) }}" onsubmit="return confirm('Are you sure you want to delete this post?');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="w-full rounded-lg px-3 py-2 text-left text-xs font-semibold text-rose-200 transition hover:bg-rose-500/20">
+                                                        Delete
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
                             </div>
 
-                            <p
-                                x-ref="content"
-                                class="mt-3 max-w-full whitespace-pre-line wrap-anywhere text-sm sm:text-base lg:text-lg leading-relaxed text-slate-200"
-                                :class="{ 'max-h-28 overflow-hidden': truncatable && !expanded }"
-                            >{{ $post->content }}</p>
+                            <template x-if="!editing">
+                                <div>
+                                    <p
+                                        x-ref="content"
+                                        class="mt-3 max-w-full whitespace-pre-line wrap-anywhere text-sm sm:text-base lg:text-lg leading-relaxed text-slate-200"
+                                        :class="{ 'max-h-28 overflow-hidden': truncatable && !expanded }"
+                                    >{{ $post->content }}</p>
 
-                            <button
-                                x-show="truncatable"
-                                x-cloak
-                                type="button"
-                                @click="expanded = !expanded"
-                                class="mt-2 text-xs font-semibold text-cyan-200 underline underline-offset-2 hover:text-cyan-100"
-                            >
-                                <span x-show="!expanded">See more</span>
-                                <span x-show="expanded">See less</span>
-                            </button>
+                                    <button
+                                        x-show="truncatable"
+                                        x-cloak
+                                        type="button"
+                                        @click="expanded = !expanded"
+                                        class="mt-2 text-xs font-semibold text-cyan-200 underline underline-offset-2 hover:text-cyan-100"
+                                    >
+                                        <span x-show="!expanded">See more</span>
+                                        <span x-show="expanded">See less</span>
+                                    </button>
+                                </div>
+                            </template>
+
+                            @if ((int) $post->user_id === (int) Auth::id())
+                                <form
+                                    x-show="editing"
+                                    x-cloak
+                                    method="POST"
+                                    action="{{ route('posts.update', $post) }}"
+                                    class="mt-4 space-y-3"
+                                    style="display: none;"
+                                >
+                                    @csrf
+                                    @method('PUT')
+
+                                    <textarea
+                                        x-ref="editContent"
+                                        x-model="editContent"
+                                        name="edit_content"
+                                        rows="4"
+                                        maxlength="400"
+                                        required
+                                        class="block w-full rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-300/40"
+                                    ></textarea>
+
+                                    @error('edit_content')
+                                        <p class="text-sm text-rose-300">{{ $message }}</p>
+                                    @enderror
+
+                                    <div class="flex justify-end gap-2">
+                                        <button
+                                            type="button"
+                                            @click="editing = false; editContent = originalContent"
+                                            class="rounded-lg border border-white/20 px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:bg-white/10"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            class="rounded-lg bg-cyan-300 px-3 py-1.5 text-xs font-semibold text-slate-900 transition hover:bg-cyan-200"
+                                        >
+                                            Save Changes
+                                        </button>
+                                    </div>
+                                </form>
+                            @endif
 
                             @if ($post->attachment)
                                 <div class="mt-4">

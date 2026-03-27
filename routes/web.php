@@ -45,6 +45,29 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return back()->with('status', 'Post published successfully.');
     })->name('posts.store');
 
+    Route::put('/posts/{post}', function (Request $request, Post $post) {
+        abort_unless((int) $post->user_id === (int) $request->user()->id, 403);
+
+        $validated = $request->validate([
+            'edit_content' => ['required', 'string', 'max:400'],
+        ]);
+
+        $post->update([
+            'content' => $validated['edit_content'],
+        ]);
+
+        return back()->with('status', 'Post updated successfully.');
+    })->name('posts.update');
+
+    Route::delete('/posts/{post}', function (Request $request, Post $post) {
+        abort_unless((int) $post->user_id === (int) $request->user()->id, 403);
+
+        // Soft delete keeps the record for audit trails and activity logs.
+        $post->delete();
+
+        return back()->with('status', 'Post deleted successfully.');
+    })->name('posts.destroy');
+
 });
 
 Route::middleware(['auth'])->group(function () {
