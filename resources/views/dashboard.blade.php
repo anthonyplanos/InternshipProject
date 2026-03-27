@@ -14,6 +14,7 @@
         x-data="{
             modalOpen: false,
             imageUrl: '',
+            createContent: '',
             selectedAttachmentName: '',
             openImage(url) {
                 this.imageUrl = url;
@@ -32,6 +33,13 @@
                     this.$refs.attachmentInput.value = '';
                 }
                 this.selectedAttachmentName = '';
+            },
+            clearCreatePost() {
+                this.createContent = '';
+                if (this.$refs.createPostContent) {
+                    this.$refs.createPostContent.value = '';
+                }
+                this.clearAttachment();
             }
         }"
         @keydown.escape.window="closeImage()"
@@ -65,7 +73,7 @@
 
                         <div>
                             <label for="content" class="mb-2 block text-sm font-medium text-slate-200">Your Post</label>
-                            <textarea id="content" name="content" rows="5" maxlength="400" required class="block w-full rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-300/40" placeholder="What should we improve as a company?"></textarea>
+                            <textarea x-ref="createPostContent" x-model="createContent" id="content" name="content" rows="5" maxlength="400" required class="block w-full resize-none rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-300/40" placeholder="What should we improve as a company?"></textarea>
                             <p class="mt-2 text-xs text-slate-400">Maximum 400 characters.</p>
                             @error('content')
                                 <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
@@ -89,7 +97,17 @@
                             @enderror
                         </div>
 
-                        <div class="flex justify-end">
+                        <div class="flex justify-end gap-2">
+                            <button
+                                type="button"
+                                x-show="createContent.trim().length > 0"
+                                x-transition.opacity
+                                @click="clearCreatePost()"
+                                class="rounded-xl border border-white/20 px-5 py-2.5 text-sm font-semibold text-slate-200 transition hover:bg-white/10"
+                                style="display: none;"
+                            >
+                                Cancel
+                            </button>
                             <button type="submit" class="rounded-xl bg-cyan-300 px-5 py-2.5 text-sm font-semibold text-slate-900 transition hover:bg-cyan-200">
                                 Publish Anonymously
                             </button>
@@ -194,7 +212,7 @@
                                         rows="4"
                                         maxlength="400"
                                         required
-                                        class="block w-full rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-300/40"
+                                        class="block w-full resize-none rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-300/40"
                                     ></textarea>
 
                                     @error('edit_content')
