@@ -6,11 +6,8 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ForceDeleteBulkAction;
-use Filament\Actions\RestoreBulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 
 class UsersTable
@@ -51,7 +48,6 @@ class UsersTable
                     'staff' => 'Staff',
                     'employee' => 'Employee',
                 ]),
-                TrashedFilter::make(),
             ])
             ->recordActions([
                 EditAction::make()
@@ -62,10 +58,6 @@ class UsersTable
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->visible(fn (): bool => (bool) auth()->user()?->can('users.manage')),
-                    ForceDeleteBulkAction::make()
-                        ->visible(fn (): bool => (bool) auth()->user()?->can('users.manage')),
-                    RestoreBulkAction::make()
                         ->visible(fn (): bool => (bool) auth()->user()?->can('users.manage')),
                 ])
                     ->visible(fn (): bool => (bool) auth()->user()?->can('users.manage')),
