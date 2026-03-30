@@ -50,12 +50,12 @@ class RegisteredUserController extends Controller
         $user = User::create([
             'name' => trim((string) $request->name),
             'email' => $normalizedEmail,
-            'role' => 'Employee',
+            'role' => 'User',
             'password' => Hash::make($request->password),
         ]);
 
-        Role::findOrCreate('Employee', 'web');
-        $user->assignRole('Employee');
+        Role::findOrCreate('User', 'web');
+        $user->assignRole('User');
 
         event(new Registered($user));
 

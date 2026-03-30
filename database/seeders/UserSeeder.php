@@ -32,7 +32,7 @@ class UserSeeder extends Seeder
 
         $adminRole = Role::findOrCreate('Admin', 'web');
         $staffRole = Role::findOrCreate('Staff', 'web');
-        $employeeRole = Role::findOrCreate('Employee', 'web');
+        $userRole = Role::findOrCreate('User', 'web');
 
         $adminRole->syncPermissions($permissions);
         $staffRole->syncPermissions([
@@ -40,7 +40,7 @@ class UserSeeder extends Seeder
             'users.view',
             'logs.view',
         ]);
-        $employeeRole->syncPermissions([]);
+        $userRole->syncPermissions([]);
 
         $admin = User::updateOrCreate([
             'email' => 'aplanos22-0551@cca.edu.ph',
@@ -54,12 +54,12 @@ class UserSeeder extends Seeder
             'email' => 'anthony.vshore360agency@gmail.com',
         ], [
             'name' => 'Ton',
-            'role' => 'Employee',
+            'role' => 'User',
             'password' => Hash::make('password'),
         ]);
 
         $admin->syncRoles(['Admin']);
-        $testUser->syncRoles(['Employee']);
+        $testUser->syncRoles(['User']);
 
         $targetUsers = 10;
         $currentUsers = User::query()->count();
@@ -68,7 +68,7 @@ class UserSeeder extends Seeder
             User::factory()
                 ->count($targetUsers - $currentUsers)
                 ->create()
-                ->each(fn (User $user) => $user->assignRole('Employee'));
+                ->each(fn (User $user) => $user->assignRole('User'));
         }
 
         $targetUsers = 20;

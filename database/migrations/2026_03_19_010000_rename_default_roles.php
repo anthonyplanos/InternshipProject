@@ -16,7 +16,7 @@ return new class extends Migration
 
         DB::table('roles')
             ->where('name', 'user')
-            ->update(['name' => 'Employee']);
+            ->update(['name' => 'User']);
     }
 
     /**
@@ -29,7 +29,7 @@ return new class extends Migration
             ->update(['name' => 'admin']);
 
         DB::table('roles')
-            ->where('name', 'Employee')
+            ->where('name', 'User')
             ->update(['name' => 'user']);
     }
 };

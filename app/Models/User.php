@@ -89,7 +89,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     {
         static::creating(function (self $user): void {
             if (Schema::hasColumn('users', 'role') && empty($user->role)) {
-                $user->role = 'Employee';
+                $user->role = 'User';
             }
         });
 

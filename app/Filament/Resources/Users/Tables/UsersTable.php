@@ -44,9 +44,9 @@ class UsersTable
                 SelectFilter::make('role')
                 ->label('Role')
                 ->options([
-                    'admin' => 'Admin',
-                    'staff' => 'Staff',
-                    'employee' => 'Employee',
+                    'Admin' => 'Admin',
+                    'Staff' => 'Staff',
+                    'User' => 'User',
                 ]),
             ])
             ->recordActions([
