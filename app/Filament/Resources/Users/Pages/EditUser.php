@@ -5,8 +5,6 @@ namespace App\Filament\Resources\Users\Pages;
 use App\Filament\Resources\Users\UserResource;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
-use Filament\Actions\ForceDeleteAction;
-use Filament\Actions\RestoreAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 
@@ -84,10 +82,10 @@ class EditUser extends EditRecord
                 })
                 ->visible(fn (): bool => (bool) auth()->user()?->can('users.manage')),
             DeleteAction::make()
-                ->visible(fn (): bool => (bool) auth()->user()?->can('users.manage')),
-            ForceDeleteAction::make()
-                ->visible(fn (): bool => (bool) auth()->user()?->can('users.manage')),
-            RestoreAction::make()
+                ->label('Deactivate')
+                ->modalHeading('Deactivate User')
+                ->modalDescription('This will deactivate the user account. The account can be reactivated later.')
+                ->successNotificationTitle('User deactivated')
                 ->visible(fn (): bool => (bool) auth()->user()?->can('users.manage')),
         ];
     }

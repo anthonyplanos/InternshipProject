@@ -53,11 +53,19 @@ class UsersTable
                 EditAction::make()
                     ->visible(fn (): bool => (bool) auth()->user()?->can('users.manage')),
                 DeleteAction::make()
+                    ->label('Deactivate')
+                    ->modalHeading('Deactivate User')
+                    ->modalDescription('This will deactivate the user account. The account can be reactivated later.')
+                    ->successNotificationTitle('User deactivated')
                     ->visible(fn (): bool => (bool) auth()->user()?->can('users.manage')),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
+                        ->label('Deactivate Selected')
+                        ->modalHeading('Deactivate Selected Users')
+                        ->modalDescription('Selected user accounts will be deactivated and can be reactivated later.')
+                        ->successNotificationTitle('Users deactivated')
                         ->visible(fn (): bool => (bool) auth()->user()?->can('users.manage')),
                 ])
                     ->visible(fn (): bool => (bool) auth()->user()?->can('users.manage')),

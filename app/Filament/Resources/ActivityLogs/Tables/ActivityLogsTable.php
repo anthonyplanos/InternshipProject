@@ -25,11 +25,18 @@ class ActivityLogsTable
                     ->sortable(),
                 TextColumn::make('event')
                     ->badge()
+                    ->formatStateUsing(fn (?string $state): ?string => match ($state) {
+                        'deleted' => 'deactivated',
+                        'restored' => 'reactivated',
+                        'force_deleted' => 'force deleted',
+                        default => $state,
+                    })
                     ->color(fn (?string $state): string => match ($state) {
                         'created' => 'success',
                         'updated' => 'info',
                         'deleted' => 'danger',
                         'restored' => 'warning',
+                        'force_deleted' => 'gray',
                         'login' => 'success',
                         'logout' => 'gray',
                         'login_failed' => 'danger',
@@ -157,8 +164,9 @@ class ActivityLogsTable
                     ->options([
                         'created' => 'Created',
                         'updated' => 'Updated',
-                        'deleted' => 'Deleted',
-                        'restored' => 'Restored',
+                        'deleted' => 'Deactivated',
+                        'restored' => 'Reactivated',
+                        'force_deleted' => 'Force Deleted',
                         'login' => 'Login',
                         'logout' => 'Logout',
                         'login_failed' => 'Failed Login',

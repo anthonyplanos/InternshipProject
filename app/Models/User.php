@@ -69,7 +69,12 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
             ->logOnly(['name', 'email', 'role'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
-            ->setDescriptionForEvent(fn (string $eventName): string => "User account {$eventName}");
+            ->setDescriptionForEvent(fn (string $eventName): string => match ($eventName) {
+                'deleted' => 'User account deactivated',
+                'restored' => 'User account reactivated',
+                'force_deleted' => 'User account permanently deleted',
+                default => "User account {$eventName}",
+            });
     }
 
     protected static function booted(): void
@@ -93,11 +98,26 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         static::restoring(function (self $user): void {
             $user->posts()->withTrashed()->restore();
         });
+
+        static::forceDeleted(function (self $user): void {
+            activity('account')
+                ->causedBy(auth()->user())
+                ->performedOn($user)
+                ->event('force_deleted')
+                ->withProperties([
+                    'source' => 'admin_force_delete',
+                    'ip' => request()?->ip(),
+                    'target_user_id' => $user->id,
+                    'target_user_name' => $user->name,
+                    'target_user_email' => $user->email,
+                ])
+                ->log('User account permanently deleted');
+        });
     }
 
     public function posts(): HasMany
     {
-        return $this->hasMany(Post::class);
+        return $this->hasMany(Post::class, 'user_id');
     }
 
     /**

@@ -32,16 +32,24 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        $normalizedEmail = strtolower(trim((string) $request->input('email')));
+
+        if (User::onlyTrashed()->where('email', $normalizedEmail)->exists()) {
+            throw ValidationException::withMessages([
+                'email' => 'This account is deactivated. Ask the admin to reactivate your account.',
+            ]);
+        }
+
         $request->validate([
             'name' => ['required', 'string', 'min:3', 'max:50'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->withoutTrashed()],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'acknowledge_policy' => ['accepted'],
         ]);
 
         $user = User::create([
             'name' => trim((string) $request->name),
-            'email' => strtolower(trim((string) $request->email)),
+            'email' => $normalizedEmail,
             'role' => 'Employee',
             'password' => Hash::make($request->password),
         ]);

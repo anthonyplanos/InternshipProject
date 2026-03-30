@@ -49,7 +49,11 @@ class PostsTable
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
-                TrashedFilter::make(),
+                TrashedFilter::make()
+                    ->label('Archive Status')
+                    ->placeholder('Only Active')
+                    ->trueLabel('With Archive')
+                    ->falseLabel('Only Archived'),
             ])
             ->recordActions([
                 EditAction::make()
