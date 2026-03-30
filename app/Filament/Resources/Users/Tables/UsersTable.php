@@ -56,6 +56,7 @@ class UsersTable
                     ->label('Deactivate')
                     ->modalHeading('Deactivate User')
                     ->modalDescription('This will deactivate the user account. The account can be reactivated later.')
+                    ->modalSubmitActionLabel('Deactivate')
                     ->successNotificationTitle('User deactivated')
                     ->visible(fn (): bool => (bool) auth()->user()?->can('users.manage')),
             ])
@@ -65,6 +66,7 @@ class UsersTable
                         ->label('Deactivate Selected')
                         ->modalHeading('Deactivate Selected Users')
                         ->modalDescription('Selected user accounts will be deactivated and can be reactivated later.')
+                        ->modalSubmitActionLabel('Deactivate')
                         ->successNotificationTitle('Users deactivated')
                         ->visible(fn (): bool => (bool) auth()->user()?->can('users.manage')),
                 ])

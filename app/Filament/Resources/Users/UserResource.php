@@ -49,6 +49,24 @@ class UserResource extends Resource
         ];
     }
 
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name', 'email', 'role'];
+    }
+
+    public static function getGlobalSearchResultTitle(Model $record): string
+    {
+        return (string) $record->name;
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return [
+            'Email' => (string) $record->email,
+            'Role' => (string) ($record->role ?? '-'),
+        ];
+    }
+
     public static function canViewAny(): bool
     {
         return static::userCan('users.view') || static::userCan('users.manage');

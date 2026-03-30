@@ -25,7 +25,10 @@ class Post extends Model
             ->logOnly(['user_id', 'content', 'attachment'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
-            ->setDescriptionForEvent(fn (string $eventName): string => "Post {$eventName}");
+            ->setDescriptionForEvent(fn (string $eventName): string => match ($eventName) {
+                'created' => 'Post created: ' . trim((string) $this->content),
+                default => "Post {$eventName}",
+            });
     }
 
     public function user()
