@@ -85,6 +85,7 @@ class EditUser extends EditRecord
                 ->label('Deactivate')
                 ->modalHeading('Deactivate User')
                 ->modalDescription('This will deactivate the user account. The account can be reactivated later.')
+                ->modalSubmitActionLabel('Deactivate')
                 ->successNotificationTitle('User deactivated')
                 ->visible(fn (): bool => (bool) auth()->user()?->can('users.manage')),
         ];

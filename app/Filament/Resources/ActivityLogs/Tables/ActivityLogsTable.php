@@ -3,12 +3,15 @@
 namespace App\Filament\Resources\ActivityLogs\Tables;
 
 use App\Models\Activity;
+use App\Models\Post;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class ActivityLogsTable
 {
@@ -120,8 +123,30 @@ class ActivityLogsTable
                                 }
                             });
                     })
-                    ->wrap()
-                    ->limit(80),
+                    ->wrap(),
+                ImageColumn::make('attachment_preview')
+                    ->label('Attachment')
+                    ->square()
+                    ->imageSize(56)
+                    ->state(fn (Activity $record): ?string => (function () use ($record): ?string {
+                        $attachmentPath = data_get($record->properties, 'attributes.attachment')
+                            ?? data_get($record->properties, 'attachment')
+                            ?? data_get($record->properties, 'old.attachment')
+                            ?? (($record->subject_type === Post::class) ? $record->subject?->attachment : null);
+
+                        if (! filled($attachmentPath)) {
+                            return null;
+                        }
+
+                        $normalizedPath = ltrim((string) $attachmentPath, '/');
+
+                        if (! Storage::disk('public')->exists($normalizedPath)) {
+                            return null;
+                        }
+
+                        return asset('storage/' . $normalizedPath);
+                    })())
+                    ->toggleable(),
                 TextColumn::make('causer.name')
                     ->label('Actor')
                     ->state(fn (Activity $record): string => $record->causer?->name

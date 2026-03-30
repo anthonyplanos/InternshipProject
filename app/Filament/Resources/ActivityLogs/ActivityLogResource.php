@@ -11,6 +11,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class ActivityLogResource extends Resource
 {
@@ -47,6 +48,24 @@ class ActivityLogResource extends Resource
     {
         return [
             'index' => ListActivityLogs::route('/'),
+        ];
+    }
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['event', 'description', 'log_name', 'causer.name', 'causer.email', 'properties'];
+    }
+
+    public static function getGlobalSearchResultTitle(Model $record): string
+    {
+        return Str::headline((string) $record->event) . ' - ' . Str::limit((string) $record->description, 60);
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return [
+            'Log' => (string) ($record->log_name ?? '-'),
+            'Actor' => (string) ($record->causer?->name ?? 'System'),
         ];
     }
 

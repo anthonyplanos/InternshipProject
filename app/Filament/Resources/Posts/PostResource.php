@@ -16,6 +16,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Str;
 
 class PostResource extends Resource
 {
@@ -48,6 +49,24 @@ class PostResource extends Resource
             'index' => ListPosts::route('/'),
             'create' => CreatePost::route('/create'),
             'edit' => EditPost::route('/{record}/edit'),
+        ];
+    }
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['content', 'user.name'];
+    }
+
+    public static function getGlobalSearchResultTitle(Model $record): string
+    {
+        return 'Post #' . $record->id;
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return [
+            'Author' => (string) ($record->user?->name ?? 'Unknown'),
+            'Content' => Str::limit((string) $record->content, 80),
         ];
     }
 

@@ -70,11 +70,19 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
             ->setDescriptionForEvent(fn (string $eventName): string => match ($eventName) {
-                'deleted' => 'User account deactivated',
-                'restored' => 'User account reactivated',
+                'deleted' => $this->buildAccountEventDescription('deactivated'),
+                'restored' => $this->buildAccountEventDescription('reactivated'),
                 'force_deleted' => 'User account permanently deleted',
                 default => "User account {$eventName}",
             });
+    }
+
+    protected function buildAccountEventDescription(string $status): string
+    {
+        $accountName = (string) ($this->name ?? 'Unknown User');
+        $accountEmail = (string) ($this->email ?? 'no-email');
+
+        return "User account {$status}: {$accountName} ({$accountEmail})";
     }
 
     protected static function booted(): void
