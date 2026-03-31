@@ -30,21 +30,52 @@ class Comment extends Model
             ->dontSubmitEmptyLogs()
             ->setDescriptionForEvent(fn (string $eventName): string => match ($eventName) {
                 'created' => $this->buildCreatedDescription(),
-                default => "Comment {$eventName}",
+                'updated' => $this->buildUpdatedDescription(),
+                'deleted' => $this->buildDeletedDescription(),
+                default => $this->buildGenericDescription($eventName),
             });
     }
 
     protected function buildCreatedDescription(): string
     {
-        $authorName = (string) (auth()->user()?->name ?? $this->user?->name ?? 'Unknown User');
-        $authorEmail = (string) (auth()->user()?->email ?? $this->user?->email ?? 'no-email');
         $contentPreview = Str::limit(trim((string) $this->content), 220);
 
         if (filled($this->parent_id)) {
-            return "Reply added to comment #{$this->parent_id} on Post #{$this->post_id} by {$authorName} ({$authorEmail}): {$contentPreview}";
+            return "Reply added to comment #{$this->parent_id} on Post #{$this->post_id}: {$contentPreview}";
         }
 
-        return "Comment added on Post #{$this->post_id} by {$authorName} ({$authorEmail}): {$contentPreview}";
+        return "Comment added on Post #{$this->post_id}: {$contentPreview}";
+    }
+
+    protected function buildUpdatedDescription(): string
+    {
+        $contentPreview = Str::limit(trim((string) $this->content), 220);
+
+        if (filled($this->parent_id)) {
+            return "Reply #{$this->id} on comment #{$this->parent_id} (Post #{$this->post_id}): {$contentPreview}";
+        }
+
+        return "Comment #{$this->id} on Post #{$this->post_id}: {$contentPreview}";
+    }
+
+    protected function buildDeletedDescription(): string
+    {
+        if (filled($this->parent_id)) {
+            return "Reply #{$this->id} on comment #{$this->parent_id} (Post #{$this->post_id})";
+        }
+
+        return "Comment #{$this->id} on Post #{$this->post_id}";
+    }
+
+    protected function buildGenericDescription(string $eventName): string
+    {
+        $event = Str::headline($eventName);
+
+        if (filled($this->parent_id)) {
+            return "Reply #{$this->id} on comment #{$this->parent_id} (Post #{$this->post_id}) {$event}";
+        }
+
+        return "Comment #{$this->id} on Post #{$this->post_id} {$event}";
     }
 
     public function post(): BelongsTo
