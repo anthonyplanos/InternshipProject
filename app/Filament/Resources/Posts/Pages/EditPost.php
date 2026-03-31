@@ -20,7 +20,7 @@ class EditPost extends EditRecord
             ForceDeleteAction::make()
                 ->visible(fn (): bool => (bool) auth()->user()?->can('posts.manage')),
             RestoreAction::make()
-                ->visible(fn (): bool => (bool) auth()->user()?->can('posts.manage')),
+                ->visible(fn (): bool => (bool) auth()->user()?->can('posts.manage') && (bool) $this->record?->trashed()),
         ];
     }
 }

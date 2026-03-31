@@ -12,7 +12,9 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Str;
 
 class CommentsResource extends Resource
@@ -104,6 +106,34 @@ class CommentsResource extends Resource
     public static function canDeleteAny(): bool
     {
         return static::userCan('posts.manage');
+    }
+
+    public static function canRestore(Model $record): bool
+    {
+        return static::userCan('posts.manage');
+    }
+
+    public static function canRestoreAny(): bool
+    {
+        return static::userCan('posts.manage');
+    }
+
+    public static function canForceDelete(Model $record): bool
+    {
+        return static::userCan('posts.manage');
+    }
+
+    public static function canForceDeleteAny(): bool
+    {
+        return static::userCan('posts.manage');
+    }
+
+    public static function getRecordRouteBindingEloquentQuery(): Builder
+    {
+        return parent::getRecordRouteBindingEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
     }
 
     protected static function userCan(string $permission): bool

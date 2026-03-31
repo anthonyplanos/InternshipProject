@@ -6,8 +6,11 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreBulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -64,16 +67,31 @@ class CommentsTable
                             default => $query,
                         };
                     }),
+                TrashedFilter::make()
+                    ->label('Archive Status')
+                    ->placeholder('Only Active')
+                    ->trueLabel('With Archive')
+                    ->falseLabel('Only Archived'),
             ])
             ->recordActions([
                 EditAction::make()
                     ->visible(fn (): bool => (bool) auth()->user()?->can('posts.manage')),
                 DeleteAction::make()
+                    ->label('Delete')
+                    ->modalHeading('Delete')
                     ->visible(fn (): bool => (bool) auth()->user()?->can('posts.manage')),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
+                        ->label('Delete Selected')
+                        ->modalHeading('Delete')
+                        ->visible(fn (): bool => (bool) auth()->user()?->can('posts.manage')),
+                    ForceDeleteBulkAction::make()
+                        ->label('Delete Permanently')
+                        ->modalHeading('Delete')
+                        ->visible(fn (): bool => (bool) auth()->user()?->can('posts.manage')),
+                    RestoreBulkAction::make()
                         ->visible(fn (): bool => (bool) auth()->user()?->can('posts.manage')),
                 ]),
             ]);

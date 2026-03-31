@@ -4,6 +4,8 @@ namespace App\Filament\Resources\Comments\Pages;
 
 use App\Filament\Resources\Comments\CommentsResource;
 use Filament\Actions\DeleteAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditComments extends EditRecord
@@ -14,10 +16,13 @@ class EditComments extends EditRecord
     {
         return [
             DeleteAction::make()
-                ->modalHeading('Delete Comment')
-                ->modalDescription('This will permanently delete the selected comment or reply.')
-                ->modalSubmitActionLabel('Delete')
-                ->visible(fn (): bool => (bool) auth()->user()?->can('posts.manage')),
+                ->visible(fn (): bool => (bool) auth()->user()?->can('posts.manage'))
+                ->modalHeading('Delete'),
+            ForceDeleteAction::make()
+                ->visible(fn (): bool => (bool) auth()->user()?->can('posts.manage'))
+                ->modalHeading('Force Delete'),
+            RestoreAction::make()
+                ->visible(fn (): bool => (bool) auth()->user()?->can('posts.manage') && (bool) $this->record?->trashed()),
         ];
     }
 }
