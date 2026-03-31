@@ -128,6 +128,11 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         return $this->hasMany(Post::class, 'user_id');
     }
 
+    public function comments(): HasMany
+    {
+        return $this->hasMany(\App\Models\Comment::class, 'user_id');
+    }
+
     /**
      * Persist a role snapshot on the users table so it is visible in DB tools.
      */

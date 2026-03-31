@@ -117,14 +117,145 @@
 
                 <div class="space-y-4">
                     @forelse ($posts as $post)
+                        @php
+                            $initialComments = $post->comments->map(fn ($comment) => [
+                                'id' => $comment->id,
+                                'parent_id' => null,
+                                'author' => (string) ($comment->user?->name ?? 'Deactivated User'),
+                                'content' => (string) $comment->content,
+                                'created_at_human' => (string) ($comment->created_at?->diffForHumans() ?? 'just now'),
+                                'replies' => $comment->replies->map(fn ($reply) => [
+                                    'id' => $reply->id,
+                                    'parent_id' => $comment->id,
+                                    'author' => (string) ($reply->user?->name ?? 'Deactivated User'),
+                                    'content' => (string) $reply->content,
+                                    'created_at_human' => (string) ($reply->created_at?->diffForHumans() ?? 'just now'),
+                                ])->values(),
+                            ])->values();
+                        @endphp
                         <article
-                            x-data="{ expanded: false, truncatable: false, menuOpen: false, editing: false, editContent: @js($post->content), originalContent: @js($post->content) }"
+                            x-data="{
+                                expanded: false,
+                                truncatable: false,
+                                menuOpen: false,
+                                editing: false,
+                                editContent: @js($post->content),
+                                originalContent: @js($post->content),
+                                commentsModalOpen: false,
+                                commentContent: '',
+                                commentError: '',
+                                isSubmittingComment: false,
+                                replyDrafts: {},
+                                replyErrors: {},
+                                replyingTo: null,
+                                replyVisibleCount: {},
+                                comments: @js($initialComments),
+                                commentUrl: @js(route('posts.comments.store', $post)),
+                                replyUrlTemplate: @js(route('comments.replies.store', ['comment' => '__COMMENT_ID__'])),
+                                getReplyUrl(commentId) {
+                                    return this.replyUrlTemplate.replace('__COMMENT_ID__', String(commentId));
+                                },
+                                async submitComment() {
+                                    const content = this.commentContent.trim();
+
+                                    if (!content) {
+                                        this.commentError = 'Comment cannot be empty.';
+                                        return;
+                                    }
+
+                                    this.isSubmittingComment = true;
+                                    this.commentError = '';
+
+                                    try {
+                                        const formData = new FormData();
+                                        formData.append('_token', @js(csrf_token()));
+                                        formData.append('comment_content', content);
+
+                                        const response = await fetch(this.commentUrl, {
+                                            method: 'POST',
+                                            headers: {
+                                                'Accept': 'application/json',
+                                                'X-Requested-With': 'XMLHttpRequest',
+                                            },
+                                            body: formData,
+                                        });
+
+                                        const payload = await response.json().catch(() => ({}));
+
+                                        if (!response.ok) {
+                                            this.commentError = payload?.errors?.comment_content?.[0]
+                                                ?? payload?.message
+                                                ?? 'Unable to post comment right now.';
+                                            return;
+                                        }
+
+                                        this.comments.push(payload.comment);
+                                        this.commentContent = '';
+                                    } catch (error) {
+                                        this.commentError = 'Unable to post comment right now.';
+                                    } finally {
+                                        this.isSubmittingComment = false;
+                                    }
+                                }
+                                ,
+                                async submitReply(commentId) {
+                                    const replyBody = (this.replyDrafts[commentId] ?? '').trim();
+
+                                    if (!replyBody) {
+                                        this.replyErrors[commentId] = 'Reply cannot be empty.';
+                                        return;
+                                    }
+
+                                    this.replyingTo = commentId;
+                                    this.replyErrors[commentId] = '';
+
+                                    try {
+                                        const formData = new FormData();
+                                        formData.append('_token', @js(csrf_token()));
+                                        formData.append('reply_content', replyBody);
+
+                                        const response = await fetch(this.getReplyUrl(commentId), {
+                                            method: 'POST',
+                                            headers: {
+                                                'Accept': 'application/json',
+                                                'X-Requested-With': 'XMLHttpRequest',
+                                            },
+                                            body: formData,
+                                        });
+
+                                        const payload = await response.json().catch(() => ({}));
+
+                                        if (!response.ok) {
+                                            this.replyErrors[commentId] = payload?.errors?.reply_content?.[0]
+                                                ?? payload?.message
+                                                ?? 'Unable to post reply right now.';
+                                            return;
+                                        }
+
+                                        const parent = this.comments.find((comment) => Number(comment.id) === Number(commentId));
+
+                                        if (parent) {
+                                            if (!Array.isArray(parent.replies)) {
+                                                parent.replies = [];
+                                            }
+
+                                            parent.replies.push(payload.reply);
+                                        }
+
+                                        this.replyDrafts[commentId] = '';
+                                    } catch (error) {
+                                        this.replyErrors[commentId] = 'Unable to post reply right now.';
+                                    } finally {
+                                        this.replyingTo = null;
+                                    }
+                                }
+                            }"
                             x-init="$nextTick(() => { truncatable = $refs.content.scrollHeight > 112; })"
                             class="rounded-2xl border border-white/10 bg-slate-900/80 p-5 shadow-xl shadow-cyan-950/20"
                         >
                             <div class="flex items-center justify-between gap-3">
                                 <div class="flex items-center gap-2">
-                                    <p class="text-sm sm:text-base lg:text-lg font-semibold text-cyan-200">{{ $post->user->name ?? 'Unknown User' }}</p>
+                                    <p class="text-sm sm:text-base lg:text-lg font-semibold text-cyan-200">{{ $post->user->name ?? 'Deactivated User' }}</p>
                                     @if (($post->user?->isAdmin()))
                                         <span class="rounded-full border border-amber-300/30 bg-amber-300/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-200">Admin</span>
                                     @endif
@@ -248,6 +379,132 @@
                                     </button>
                                 </div>
                             @endif
+
+                            <div class="mt-5 border-t border-white/10 pt-4">
+                                <p class="text-sm font-semibold text-cyan-200">Comments (<span x-text="comments.length"></span>)</p>
+
+                                <div class="mt-3 space-y-3">
+                                    <template x-for="comment in comments.slice(-3)" :key="comment.id">
+                                        <div class="rounded-xl border border-white/10 bg-slate-950/60 px-3 py-2.5">
+                                            <div class="flex items-center justify-between gap-2">
+                                                <p class="text-xs font-semibold text-cyan-200" x-text="comment.author"></p>
+                                                <span class="text-[11px] text-slate-400" x-text="comment.created_at_human"></span>
+                                            </div>
+                                            <p class="mt-1 whitespace-pre-line wrap-anywhere text-sm text-slate-200" x-text="comment.content"></p>
+                                        </div>
+                                    </template>
+
+                                    <p x-show="comments.length === 0" class="text-sm text-slate-400">No comments yet. Start the conversation.</p>
+                                </div>
+
+                                <div class="mt-2" x-show="comments.length > 3">
+                                    <button
+                                        type="button"
+                                        @click="commentsModalOpen = true"
+                                        class="text-xs font-semibold text-cyan-200 underline underline-offset-2 hover:text-cyan-100"
+                                    >
+                                        See more comments
+                                    </button>
+                                </div>
+
+                                <form @submit.prevent="submitComment()" class="mt-3 space-y-2">
+                                    @csrf
+                                    <textarea
+                                        x-model="commentContent"
+                                        name="comment_content"
+                                        rows="2"
+                                        maxlength="500"
+                                        required
+                                        class="block w-full resize-none rounded-xl border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-300/40"
+                                        placeholder="Write a comment..."
+                                    ></textarea>
+
+                                    <p x-show="commentError" x-text="commentError" class="text-sm text-rose-300"></p>
+
+                                    <div class="flex justify-end">
+                                        <button :disabled="isSubmittingComment" type="submit" class="rounded-lg bg-cyan-300 px-3 py-1.5 text-xs font-semibold text-slate-900 transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-60">
+                                            <span x-show="!isSubmittingComment">Comment</span>
+                                            <span x-show="isSubmittingComment">Posting...</span>
+                                        </button>
+                                    </div>
+                                </form>
+
+                                <div
+                                    x-show="commentsModalOpen"
+                                    x-transition.opacity
+                                    class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 px-4"
+                                    style="display: none;"
+                                    @click.self="commentsModalOpen = false"
+                                    @keydown.escape.window="commentsModalOpen = false"
+                                >
+                                    <div class="w-full max-w-2xl rounded-2xl border border-white/10 bg-slate-900 p-3 shadow-2xl shadow-cyan-950/40">
+                                        <div class="mb-3 flex items-center justify-between px-2">
+                                            <p class="text-sm font-semibold text-cyan-200">All Comments (<span x-text="comments.length"></span>)</p>
+                                            <button
+                                                type="button"
+                                                @click="commentsModalOpen = false"
+                                                class="rounded-lg border border-white/15 px-3 py-1 text-xs font-medium text-slate-200 hover:bg-white/10"
+                                            >
+                                                Close
+                                            </button>
+                                        </div>
+
+                                        <div class="max-h-[60vh] space-y-3 overflow-auto rounded-xl border border-white/10 bg-slate-950 p-3">
+                                            <template x-for="comment in comments" :key="'modal-' + comment.id">
+                                                <div class="rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2.5">
+                                                    <div class="flex items-center justify-between gap-2">
+                                                        <p class="text-xs font-semibold text-cyan-200" x-text="comment.author"></p>
+                                                        <span class="text-[11px] text-slate-400" x-text="comment.created_at_human"></span>
+                                                    </div>
+                                                    <p class="mt-1 whitespace-pre-line wrap-anywhere text-sm text-slate-200" x-text="comment.content"></p>
+
+                                                    <div class="mt-2 space-y-2 ps-3 border-l border-white/10" x-show="Array.isArray(comment.replies) && comment.replies.length > 0">
+                                                                        <template x-for="reply in comment.replies.slice(0, replyVisibleCount[comment.id] ?? 3)" :key="'reply-' + reply.id">
+                                                            <div class="rounded-lg border border-white/10 bg-slate-950/70 px-2.5 py-2">
+                                                                <div class="flex items-center justify-between gap-2">
+                                                                    <p class="text-[11px] font-semibold text-cyan-200" x-text="reply.author"></p>
+                                                                    <span class="text-[10px] text-slate-400" x-text="reply.created_at_human"></span>
+                                                                </div>
+                                                                <p class="mt-1 whitespace-pre-line wrap-anywhere text-xs text-slate-200" x-text="reply.content"></p>
+                                                            </div>
+                                                        </template>
+
+                                                                        <div class="pt-1" x-show="comment.replies.length > 3">
+                                                                            <button
+                                                                                type="button"
+                                                                                @click="replyVisibleCount[comment.id] = (replyVisibleCount[comment.id] ?? 3) >= comment.replies.length ? 3 : comment.replies.length"
+                                                                                class="text-[11px] font-semibold text-cyan-200 underline underline-offset-2 hover:text-cyan-100"
+                                                                            >
+                                                                                <span x-text="(replyVisibleCount[comment.id] ?? 3) >= comment.replies.length ? 'See less replies' : 'See more replies'"></span>
+                                                                            </button>
+                                                                        </div>
+                                                    </div>
+
+                                                    <form class="mt-2 space-y-2" @submit.prevent="submitReply(comment.id)">
+                                                        <textarea
+                                                            x-model="replyDrafts[comment.id]"
+                                                            rows="2"
+                                                            maxlength="500"
+                                                            required
+                                                            class="block w-full resize-none rounded-lg border border-slate-700 bg-slate-950/60 px-2.5 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-300/40"
+                                                            placeholder="Reply to this comment..."
+                                                        ></textarea>
+
+                                                        <p x-show="replyErrors[comment.id]" x-text="replyErrors[comment.id]" class="text-xs text-rose-300"></p>
+
+                                                        <div class="flex justify-end">
+                                                            <button :disabled="replyingTo === comment.id" type="submit" class="rounded-lg bg-cyan-300 px-2.5 py-1 text-[11px] font-semibold text-slate-900 transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-60">
+                                                                <span x-show="replyingTo !== comment.id">Reply</span>
+                                                                <span x-show="replyingTo === comment.id">Posting...</span>
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </article>
                     @empty
                         <div class="rounded-2xl border border-white/10 bg-slate-900/80 p-5 text-sm text-slate-300 shadow-xl shadow-cyan-950/20">

@@ -182,6 +182,7 @@ class ActivityLogsTable
                     ->options([
                         'account' => 'Account',
                         'auth' => 'Authentication',
+                        'comment' => 'Comment',
                         'post' => 'Post',
                         'default' => 'Default',
                     ]),
