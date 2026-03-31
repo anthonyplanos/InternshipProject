@@ -24,14 +24,6 @@ class CommentsResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
     protected static ?int $navigationSort = 3;
 
-    protected static ?string $navigationLabel = 'Comments';
-
-    protected static ?string $modelLabel = 'Comment';
-
-    protected static ?string $pluralModelLabel = 'Comments';
-
-    protected static ?string $recordTitleAttribute = 'content';
-
     public static function form(Schema $schema): Schema
     {
         return CommentsForm::configure($schema);

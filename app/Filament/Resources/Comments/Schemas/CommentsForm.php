@@ -36,7 +36,7 @@ class CommentsForm
                     ->disabled()
                     ->dehydrated(false),
                 Textarea::make('content')
-                    ->label('Content')
+                    ->label('Comment')
                     ->required()
                     ->rows(5)
                     ->maxLength(400)
