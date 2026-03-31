@@ -17,7 +17,8 @@ class UsersTable
         return $table
             ->columns([
                 TextColumn::make('id')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('name')
                     ->searchable()
                     ->sortable(),

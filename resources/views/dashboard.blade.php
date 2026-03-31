@@ -121,12 +121,14 @@
                             $initialComments = $post->comments->map(fn ($comment) => [
                                 'id' => $comment->id,
                                 'parent_id' => null,
+                                'user_id' => $comment->user_id,
                                 'author' => (string) ($comment->user?->name ?? 'Deactivated User'),
                                 'content' => (string) $comment->content,
                                 'created_at_human' => (string) ($comment->created_at?->diffForHumans() ?? 'just now'),
                                 'replies' => $comment->replies->map(fn ($reply) => [
                                     'id' => $reply->id,
                                     'parent_id' => $comment->id,
+                                    'user_id' => $reply->user_id,
                                     'author' => (string) ($reply->user?->name ?? 'Deactivated User'),
                                     'content' => (string) $reply->content,
                                     'created_at_human' => (string) ($reply->created_at?->diffForHumans() ?? 'just now'),
@@ -145,15 +147,23 @@
                                 commentContent: '',
                                 commentError: '',
                                 isSubmittingComment: false,
+                                currentUserId: @js((int) Auth::id()),
                                 replyDrafts: {},
+                                replyFormsOpen: {},
                                 replyErrors: {},
                                 replyingTo: null,
                                 replyVisibleCount: {},
+                                commentMenusOpen: {},
+                                replyMenusOpen: {},
                                 comments: @js($initialComments),
                                 commentUrl: @js(route('posts.comments.store', $post)),
                                 replyUrlTemplate: @js(route('comments.replies.store', ['comment' => '__COMMENT_ID__'])),
+                                deleteUrlTemplate: @js(route('comments.destroy', ['comment' => '__COMMENT_ID__'])),
                                 getReplyUrl(commentId) {
                                     return this.replyUrlTemplate.replace('__COMMENT_ID__', String(commentId));
+                                },
+                                getDeleteUrl(commentId) {
+                                    return this.deleteUrlTemplate.replace('__COMMENT_ID__', String(commentId));
                                 },
                                 async submitComment() {
                                     const content = this.commentContent.trim();
@@ -243,10 +253,71 @@
                                         }
 
                                         this.replyDrafts[commentId] = '';
+                                        this.replyFormsOpen[commentId] = false;
                                     } catch (error) {
                                         this.replyErrors[commentId] = 'Unable to post reply right now.';
                                     } finally {
                                         this.replyingTo = null;
+                                    }
+                                },
+                                async deleteComment(commentId) {
+                                    if (!confirm('Are you sure you want to delete this comment?')) {
+                                        return;
+                                    }
+
+                                    try {
+                                        const response = await fetch(this.getDeleteUrl(commentId), {
+                                            method: 'DELETE',
+                                            headers: {
+                                                'Accept': 'application/json',
+                                                'X-Requested-With': 'XMLHttpRequest',
+                                                'X-CSRF-TOKEN': @js(csrf_token()),
+                                            },
+                                        });
+
+                                        const payload = await response.json().catch(() => ({}));
+
+                                        if (!response.ok) {
+                                            this.commentError = payload?.message ?? 'Unable to delete comment right now.';
+                                            return;
+                                        }
+
+                                        this.comments = this.comments.filter((comment) => Number(comment.id) !== Number(commentId));
+                                    } catch (error) {
+                                        this.commentError = 'Unable to delete comment right now.';
+                                    }
+                                },
+                                async deleteReply(commentId, replyId) {
+                                    if (!confirm('Are you sure you want to delete this reply?')) {
+                                        return;
+                                    }
+
+                                    try {
+                                        const response = await fetch(this.getDeleteUrl(replyId), {
+                                            method: 'DELETE',
+                                            headers: {
+                                                'Accept': 'application/json',
+                                                'X-Requested-With': 'XMLHttpRequest',
+                                                'X-CSRF-TOKEN': @js(csrf_token()),
+                                            },
+                                        });
+
+                                        const payload = await response.json().catch(() => ({}));
+
+                                        if (!response.ok) {
+                                            this.replyErrors[commentId] = payload?.message ?? 'Unable to delete reply right now.';
+                                            return;
+                                        }
+
+                                        const parent = this.comments.find((comment) => Number(comment.id) === Number(commentId));
+
+                                        if (!parent || !Array.isArray(parent.replies)) {
+                                            return;
+                                        }
+
+                                        parent.replies = parent.replies.filter((reply) => Number(reply.id) !== Number(replyId));
+                                    } catch (error) {
+                                        this.replyErrors[commentId] = 'Unable to delete reply right now.';
                                     }
                                 }
                             }"
@@ -388,9 +459,119 @@
                                         <div class="rounded-xl border border-white/10 bg-slate-950/60 px-3 py-2.5">
                                             <div class="flex items-center justify-between gap-2">
                                                 <p class="text-xs font-semibold text-cyan-200" x-text="comment.author"></p>
-                                                <span class="text-[11px] text-slate-400" x-text="comment.created_at_human"></span>
+                                                <div class="flex items-center gap-2">
+                                                    <span class="text-[11px] text-slate-400" x-text="comment.created_at_human"></span>
+                                                    <div class="relative" x-show="Number(comment.user_id) === Number(currentUserId)" @click.outside="commentMenusOpen[comment.id] = false">
+                                                        <button
+                                                            type="button"
+                                                            @click="commentMenusOpen[comment.id] = !(commentMenusOpen[comment.id] ?? false)"
+                                                            class="inline-flex h-6 w-6 items-center justify-center rounded-full text-slate-300/90 transition hover:bg-white/10 hover:text-cyan-200"
+                                                            aria-label="Comment options"
+                                                        >
+                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4" aria-hidden="true">
+                                                                <path d="M10 4.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm0 7a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm0 7a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" />
+                                                            </svg>
+                                                        </button>
+
+                                                        <div
+                                                            x-show="commentMenusOpen[comment.id] ?? false"
+                                                            x-transition.opacity
+                                                            class="absolute right-0 z-20 mt-1 w-28 rounded-lg border border-white/10 bg-slate-900/95 p-1.5 shadow-xl shadow-cyan-950/30"
+                                                            style="display: none;"
+                                                        >
+                                                            <button
+                                                                type="button"
+                                                                @click="commentMenusOpen[comment.id] = false; deleteComment(comment.id)"
+                                                                class="w-full rounded-md px-2 py-1.5 text-left text-[11px] font-semibold text-rose-200 transition hover:bg-rose-500/20"
+                                                            >
+                                                                Delete
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                             <p class="mt-1 whitespace-pre-line wrap-anywhere text-sm text-slate-200" x-text="comment.content"></p>
+
+                                            <div class="mt-2 space-y-2 border-l border-white/10 ps-3" x-show="Array.isArray(comment.replies) && comment.replies.length > 0">
+                                                <template x-for="reply in comment.replies.slice(0, replyVisibleCount[comment.id] ?? 2)" :key="'inline-reply-' + reply.id">
+                                                    <div class="rounded-lg border border-white/10 bg-slate-900/60 px-2.5 py-2">
+                                                        <div class="flex items-center justify-between gap-2">
+                                                            <p class="text-[11px] font-semibold text-cyan-200" x-text="reply.author"></p>
+                                                            <div class="flex items-center gap-2">
+                                                                <span class="text-[10px] text-slate-400" x-text="reply.created_at_human"></span>
+                                                                <div class="relative" x-show="Number(reply.user_id) === Number(currentUserId)" @click.outside="replyMenusOpen[reply.id] = false">
+                                                                    <button
+                                                                        type="button"
+                                                                        @click="replyMenusOpen[reply.id] = !(replyMenusOpen[reply.id] ?? false)"
+                                                                        class="inline-flex h-5 w-5 items-center justify-center rounded-full text-slate-300/90 transition hover:bg-white/10 hover:text-cyan-200"
+                                                                        aria-label="Reply options"
+                                                                    >
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-3.5 w-3.5" aria-hidden="true">
+                                                                            <path d="M10 4.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm0 7a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm0 7a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" />
+                                                                        </svg>
+                                                                    </button>
+
+                                                                    <div
+                                                                        x-show="replyMenusOpen[reply.id] ?? false"
+                                                                        x-transition.opacity
+                                                                        class="absolute right-0 z-20 mt-1 w-28 rounded-lg border border-white/10 bg-slate-900/95 p-1.5 shadow-xl shadow-cyan-950/30"
+                                                                        style="display: none;"
+                                                                    >
+                                                                        <button
+                                                                            type="button"
+                                                                            @click="replyMenusOpen[reply.id] = false; deleteReply(comment.id, reply.id)"
+                                                                            class="w-full rounded-md px-2 py-1.5 text-left text-[11px] font-semibold text-rose-200 transition hover:bg-rose-500/20"
+                                                                        >
+                                                                            Delete
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <p class="mt-1 whitespace-pre-line wrap-anywhere text-xs text-slate-200" x-text="reply.content"></p>
+                                                    </div>
+                                                </template>
+
+                                                <div class="pt-1" x-show="comment.replies.length > 2">
+                                                    <button
+                                                        type="button"
+                                                        @click="replyVisibleCount[comment.id] = (replyVisibleCount[comment.id] ?? 2) >= comment.replies.length ? 2 : comment.replies.length"
+                                                        class="text-[11px] font-semibold text-cyan-200 underline underline-offset-2 hover:text-cyan-100"
+                                                    >
+                                                        <span x-text="(replyVisibleCount[comment.id] ?? 2) >= comment.replies.length ? 'See less replies' : 'See more replies'"></span>
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div class="mt-2 flex justify-end">
+                                                <button
+                                                    type="button"
+                                                    @click="replyFormsOpen[comment.id] = !(replyFormsOpen[comment.id] ?? false); if (!(replyFormsOpen[comment.id] ?? false)) { replyErrors[comment.id] = ''; }"
+                                                    class="rounded-md border border-cyan-300/30 px-2 py-0.5 text-[11px] font-semibold text-cyan-200 transition hover:bg-cyan-300/10"
+                                                >
+                                                    <span x-text="(replyFormsOpen[comment.id] ?? false) ? 'Cancel reply' : 'Reply'"></span>
+                                                </button>
+                                            </div>
+
+                                            <form class="mt-2 space-y-2" x-show="replyFormsOpen[comment.id] ?? false" style="display: none;" @submit.prevent="submitReply(comment.id)">
+                                                <textarea
+                                                    x-model="replyDrafts[comment.id]"
+                                                    rows="2"
+                                                    maxlength="400"
+                                                    required
+                                                    class="block w-full resize-none rounded-lg border border-slate-700 bg-slate-950/60 px-2.5 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-300/40"
+                                                    placeholder="Reply to this comment..."
+                                                ></textarea>
+
+                                                <p x-show="replyErrors[comment.id]" x-text="replyErrors[comment.id]" class="text-xs text-rose-300"></p>
+
+                                                <div class="flex justify-end">
+                                                    <button :disabled="replyingTo === comment.id" type="submit" class="rounded-lg bg-cyan-300 px-2.5 py-1 text-[11px] font-semibold text-slate-900 transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-60">
+                                                        <span x-show="replyingTo !== comment.id">Reply</span>
+                                                        <span x-show="replyingTo === comment.id">Posting...</span>
+                                                    </button>
+                                                </div>
+                                            </form>
                                         </div>
                                     </template>
 
@@ -413,7 +594,7 @@
                                         x-model="commentContent"
                                         name="comment_content"
                                         rows="2"
-                                        maxlength="500"
+                                        maxlength="400"
                                         required
                                         class="block w-full resize-none rounded-xl border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-300/40"
                                         placeholder="Write a comment..."
@@ -454,7 +635,36 @@
                                                 <div class="rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2.5">
                                                     <div class="flex items-center justify-between gap-2">
                                                         <p class="text-xs font-semibold text-cyan-200" x-text="comment.author"></p>
-                                                        <span class="text-[11px] text-slate-400" x-text="comment.created_at_human"></span>
+                                                        <div class="flex items-center gap-2">
+                                                            <span class="text-[11px] text-slate-400" x-text="comment.created_at_human"></span>
+                                                            <div class="relative" x-show="Number(comment.user_id) === Number(currentUserId)" @click.outside="commentMenusOpen['modal-' + comment.id] = false">
+                                                                <button
+                                                                    type="button"
+                                                                    @click="commentMenusOpen['modal-' + comment.id] = !(commentMenusOpen['modal-' + comment.id] ?? false)"
+                                                                    class="inline-flex h-6 w-6 items-center justify-center rounded-full text-slate-300/90 transition hover:bg-white/10 hover:text-cyan-200"
+                                                                    aria-label="Comment options"
+                                                                >
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4" aria-hidden="true">
+                                                                        <path d="M10 4.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm0 7a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm0 7a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" />
+                                                                    </svg>
+                                                                </button>
+
+                                                                <div
+                                                                    x-show="commentMenusOpen['modal-' + comment.id] ?? false"
+                                                                    x-transition.opacity
+                                                                    class="absolute right-0 z-20 mt-1 w-28 rounded-lg border border-white/10 bg-slate-900/95 p-1.5 shadow-xl shadow-cyan-950/30"
+                                                                    style="display: none;"
+                                                                >
+                                                                    <button
+                                                                        type="button"
+                                                                        @click="commentMenusOpen['modal-' + comment.id] = false; deleteComment(comment.id)"
+                                                                        class="w-full rounded-md px-2 py-1.5 text-left text-[11px] font-semibold text-rose-200 transition hover:bg-rose-500/20"
+                                                                    >
+                                                                        Delete
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                     <p class="mt-1 whitespace-pre-line wrap-anywhere text-sm text-slate-200" x-text="comment.content"></p>
 
@@ -463,7 +673,36 @@
                                                             <div class="rounded-lg border border-white/10 bg-slate-950/70 px-2.5 py-2">
                                                                 <div class="flex items-center justify-between gap-2">
                                                                     <p class="text-[11px] font-semibold text-cyan-200" x-text="reply.author"></p>
-                                                                    <span class="text-[10px] text-slate-400" x-text="reply.created_at_human"></span>
+                                                                    <div class="flex items-center gap-2">
+                                                                        <span class="text-[10px] text-slate-400" x-text="reply.created_at_human"></span>
+                                                                        <div class="relative" x-show="Number(reply.user_id) === Number(currentUserId)" @click.outside="replyMenusOpen['modal-' + reply.id] = false">
+                                                                            <button
+                                                                                type="button"
+                                                                                @click="replyMenusOpen['modal-' + reply.id] = !(replyMenusOpen['modal-' + reply.id] ?? false)"
+                                                                                class="inline-flex h-5 w-5 items-center justify-center rounded-full text-slate-300/90 transition hover:bg-white/10 hover:text-cyan-200"
+                                                                                aria-label="Reply options"
+                                                                            >
+                                                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-3.5 w-3.5" aria-hidden="true">
+                                                                                    <path d="M10 4.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm0 7a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm0 7a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" />
+                                                                                </svg>
+                                                                            </button>
+
+                                                                            <div
+                                                                                x-show="replyMenusOpen['modal-' + reply.id] ?? false"
+                                                                                x-transition.opacity
+                                                                                class="absolute right-0 z-20 mt-1 w-28 rounded-lg border border-white/10 bg-slate-900/95 p-1.5 shadow-xl shadow-cyan-950/30"
+                                                                                style="display: none;"
+                                                                            >
+                                                                                <button
+                                                                                    type="button"
+                                                                                    @click="replyMenusOpen['modal-' + reply.id] = false; deleteReply(comment.id, reply.id)"
+                                                                                    class="w-full rounded-md px-2 py-1.5 text-left text-[11px] font-semibold text-rose-200 transition hover:bg-rose-500/20"
+                                                                                >
+                                                                                    Delete
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
                                                                 <p class="mt-1 whitespace-pre-line wrap-anywhere text-xs text-slate-200" x-text="reply.content"></p>
                                                             </div>
@@ -480,11 +719,21 @@
                                                                         </div>
                                                     </div>
 
-                                                    <form class="mt-2 space-y-2" @submit.prevent="submitReply(comment.id)">
+                                                    <div class="mt-2 flex justify-end">
+                                                        <button
+                                                            type="button"
+                                                            @click="replyFormsOpen[comment.id] = !(replyFormsOpen[comment.id] ?? false); if (!(replyFormsOpen[comment.id] ?? false)) { replyErrors[comment.id] = ''; }"
+                                                            class="rounded-md border border-cyan-300/30 px-2 py-0.5 text-[11px] font-semibold text-cyan-200 transition hover:bg-cyan-300/10"
+                                                        >
+                                                            <span x-text="(replyFormsOpen[comment.id] ?? false) ? 'Cancel reply' : 'Reply'"></span>
+                                                        </button>
+                                                    </div>
+
+                                                    <form class="mt-2 space-y-2" x-show="replyFormsOpen[comment.id] ?? false" style="display: none;" @submit.prevent="submitReply(comment.id)">
                                                         <textarea
                                                             x-model="replyDrafts[comment.id]"
                                                             rows="2"
-                                                            maxlength="500"
+                                                            maxlength="400"
                                                             required
                                                             class="block w-full resize-none rounded-lg border border-slate-700 bg-slate-950/60 px-2.5 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-300/40"
                                                             placeholder="Reply to this comment..."

@@ -62,7 +62,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('/posts/{post}/comments', function (Request $request, Post $post) {
         $validated = $request->validate([
-            'comment_content' => ['required', 'string', 'max:500'],
+            'comment_content' => ['required', 'string', 'max:400'],
         ]);
 
         $comment = Comment::create([
@@ -79,6 +79,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 'comment' => [
                     'id' => $comment->id,
                     'parent_id' => null,
+                    'user_id' => $comment->user_id,
                     'author' => (string) ($comment->user?->name ?? 'Unknown User'),
                     'content' => (string) $comment->content,
                     'created_at_human' => (string) ($comment->created_at?->diffForHumans() ?? 'just now'),
@@ -92,7 +93,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('/comments/{comment}/replies', function (Request $request, Comment $comment) {
         $validated = $request->validate([
-            'reply_content' => ['required', 'string', 'max:500'],
+            'reply_content' => ['required', 'string', 'max:400'],
         ]);
 
         $reply = Comment::create([
@@ -110,6 +111,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 'reply' => [
                     'id' => $reply->id,
                     'parent_id' => $comment->id,
+                    'user_id' => $reply->user_id,
                     'author' => (string) ($reply->user?->name ?? 'Unknown User'),
                     'content' => (string) $reply->content,
                     'created_at_human' => (string) ($reply->created_at?->diffForHumans() ?? 'just now'),
@@ -119,6 +121,26 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         return back()->with('status', 'Reply posted successfully.');
     })->name('comments.replies.store');
+
+    Route::delete('/comments/{comment}', function (Request $request, Comment $comment) {
+        abort_unless((int) $comment->user_id === (int) $request->user()->id, 403);
+
+        $deletedCommentId = $comment->id;
+        $deletedParentId = $comment->parent_id;
+        $comment->delete();
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Comment deleted successfully.',
+                'deleted' => [
+                    'id' => $deletedCommentId,
+                    'parent_id' => $deletedParentId,
+                ],
+            ]);
+        }
+
+        return back()->with('status', 'Comment deleted successfully.');
+    })->name('comments.destroy');
 
     Route::delete('/posts/{post}', function (Request $request, Post $post) {
         abort_unless((int) $post->user_id === (int) $request->user()->id, 403);
