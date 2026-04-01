@@ -30,6 +30,9 @@ class EditPost extends EditRecord
 
             $data['category'] = $categoryName;
             $data['category_id'] = $category->id;
+        } else {
+            $data['category'] = null;
+            $data['category_id'] = null;
         }
 
         return $data;

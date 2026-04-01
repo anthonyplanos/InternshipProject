@@ -54,11 +54,6 @@ class PostsTable
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
-                SelectFilter::make('category_id')
-                    ->label('Category')
-                    ->relationship('categoryRecord', 'name')
-                    ->searchable()
-                    ->preload(),
                 TrashedFilter::make()
                     ->label('Archive Status')
                     ->placeholder('Only Active')

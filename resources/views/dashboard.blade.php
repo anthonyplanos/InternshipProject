@@ -138,7 +138,81 @@
                     </form>
                 </div>
 
-                <div class="space-y-4">
+                <div
+                    class="space-y-4"
+                    x-data="{
+                        isLoadingMore: false,
+                        hasMorePosts: @js($posts->hasMorePages()),
+                        nextPageUrl: @js($posts->nextPageUrl()),
+                        async loadMorePosts() {
+                            if (this.isLoadingMore || !this.hasMorePosts || !this.nextPageUrl) {
+                                return;
+                            }
+
+                            this.isLoadingMore = true;
+
+                            try {
+                                const response = await fetch(this.nextPageUrl, {
+                                    headers: {
+                                        'X-Requested-With': 'XMLHttpRequest',
+                                    },
+                                });
+
+                                if (!response.ok) {
+                                    return;
+                                }
+
+                                const html = await response.text();
+                                const parser = new DOMParser();
+                                const doc = parser.parseFromString(html, 'text/html');
+                                const newPosts = doc.querySelectorAll('.js-post-card');
+
+                                if (!newPosts.length) {
+                                    this.hasMorePosts = false;
+                                    this.nextPageUrl = null;
+                                    return;
+                                }
+
+                                if (this.$refs.emptyState) {
+                                    this.$refs.emptyState.remove();
+                                }
+
+                                newPosts.forEach((post) => {
+                                    this.$refs.postsFeed.insertAdjacentHTML('beforeend', post.outerHTML);
+                                });
+
+                                const meta = doc.querySelector('#posts-pagination-meta');
+
+                                if (!meta) {
+                                    this.hasMorePosts = false;
+                                    this.nextPageUrl = null;
+                                    return;
+                                }
+
+                                this.nextPageUrl = meta.dataset.nextPageUrl || null;
+                                this.hasMorePosts = meta.dataset.hasMore === '1';
+                            } finally {
+                                this.isLoadingMore = false;
+                            }
+                        },
+                        initLazyLoading() {
+                            if (!this.hasMorePosts || !this.$refs.loadMoreSentinel) {
+                                return;
+                            }
+
+                            const observer = new IntersectionObserver((entries) => {
+                                if (entries.some((entry) => entry.isIntersecting)) {
+                                    this.loadMorePosts();
+                                }
+                            }, {
+                                rootMargin: '350px 0px',
+                            });
+
+                            observer.observe(this.$refs.loadMoreSentinel);
+                        },
+                    }"
+                    x-init="initLazyLoading()"
+                >
                     <form method="GET" action="{{ route('dashboard') }}" class="rounded-xl border border-white/10 bg-slate-900/60 p-3 sm:p-4">
                         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <div class="w-full sm:w-72">
@@ -160,6 +234,7 @@
                         </div>
                     </form>
 
+                    <div x-ref="postsFeed" class="space-y-4">
                     @forelse ($posts as $post)
                         @php
                             $initialComments = $post->comments->map(fn ($comment) => [
@@ -180,6 +255,7 @@
                             ])->values();
                         @endphp
                         <article
+                            class="js-post-card rounded-2xl border border-white/10 bg-slate-900/80 p-5 shadow-xl shadow-cyan-950/20"
                             x-data="{
                                 expanded: false,
                                 truncatable: false,
@@ -370,7 +446,6 @@
                                 }
                             }"
                             x-init="$nextTick(() => { truncatable = $refs.content.scrollHeight > 112; })"
-                            class="rounded-2xl border border-white/10 bg-slate-900/80 p-5 shadow-xl shadow-cyan-950/20"
                         >
                             <div class="flex items-center justify-between gap-3">
                                 <div class="flex items-center gap-2">
@@ -848,13 +923,28 @@
                             </div>
                         </article>
                     @empty
-                        <div class="rounded-2xl border border-white/10 bg-slate-900/80 p-5 text-sm text-slate-300 shadow-xl shadow-cyan-950/20">
+                        <div x-ref="emptyState" class="rounded-2xl border border-white/10 bg-slate-900/80 p-5 text-sm text-slate-300 shadow-xl shadow-cyan-950/20">
                             No posts yet. Be the first to share an idea.
                         </div>
                     @endforelse
+                    </div>
 
-                    <div>
-                        {{ $posts->links() }}
+                    <div id="posts-pagination-meta" class="hidden" data-next-page-url="{{ $posts->nextPageUrl() ?? '' }}" data-has-more="{{ $posts->hasMorePages() ? '1' : '0' }}"></div>
+
+                    <div x-show="isLoadingMore" class="rounded-xl border border-white/10 bg-slate-900/60 px-4 py-3 text-center text-xs font-semibold text-cyan-200" style="display: none;">
+                        Loading more posts...
+                    </div>
+
+                    <div x-show="hasMorePosts" x-ref="loadMoreSentinel" class="h-4" style="display: none;"></div>
+
+                    <noscript>
+                        <div>
+                            {{ $posts->links() }}
+                        </div>
+                    </noscript>
+
+                    <div x-show="!hasMorePosts && !isLoadingMore && $refs.postsFeed && $refs.postsFeed.querySelectorAll('.js-post-card').length > 0" class="text-center text-xs text-slate-500" style="display: none;">
+                        You have reached the end.
                     </div>
                 </div>
             </section>
