@@ -14,7 +14,8 @@
         x-data="{
             modalOpen: false,
             imageUrl: '',
-            createContent: '',
+            createCategory: @js(old('category', '')),
+            createContent: @js(old('content', '')),
             selectedAttachmentName: '',
             openImage(url) {
                 this.imageUrl = url;
@@ -35,7 +36,11 @@
                 this.selectedAttachmentName = '';
             },
             clearCreatePost() {
+                this.createCategory = '';
                 this.createContent = '';
+                if (this.$refs.createPostCategory) {
+                    this.$refs.createPostCategory.value = '';
+                }
                 if (this.$refs.createPostContent) {
                     this.$refs.createPostContent.value = '';
                 }
@@ -74,6 +79,22 @@
                         <div>
                             <label for="content" class="mb-2 block text-sm font-medium text-slate-200">Your Post</label>
                             <textarea x-ref="createPostContent" x-model="createContent" id="content" name="content" rows="5" maxlength="400" required class="block w-full resize-none rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-300/40" placeholder="What should we improve as a company?"></textarea>
+                            <div class="mt-3 w-full sm:w-1/2">
+                                <input
+                                    x-ref="createPostCategory"
+                                    x-model="createCategory"
+                                    id="category"
+                                    name="category"
+                                    type="text"
+                                    maxlength="120"
+                                    required
+                                    class="block w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-xs text-slate-200 placeholder:text-slate-500 focus:border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-300/40"
+                                    placeholder="Category (e.g. Product Improvements)"
+                                />
+                            </div>
+                            @error('category')
+                                <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
+                            @enderror
                             <p class="mt-2 text-xs text-slate-400">Maximum 400 characters.</p>
                             @error('content')
                                 <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
@@ -100,7 +121,7 @@
                         <div class="flex justify-end gap-2">
                             <button
                                 type="button"
-                                x-show="createContent.trim().length > 0"
+                                x-show="createCategory.trim().length > 0 || createContent.trim().length > 0 || selectedAttachmentName"
                                 x-transition.opacity
                                 @click="clearCreatePost()"
                                 class="rounded-xl border border-white/20 px-5 py-2.5 text-sm font-semibold text-slate-200 transition hover:bg-white/10"
@@ -116,6 +137,32 @@
                 </div>
 
                 <div class="space-y-4">
+                    <form method="GET" action="{{ route('dashboard') }}" class="rounded-xl border border-white/10 bg-slate-900/60 p-3 sm:p-4">
+                        <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                            <div class="w-full sm:w-72">
+                                <label for="category_id" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400">Filter by Category</label>
+                                <select
+                                    id="category_id"
+                                    name="category_id"
+                                    class="block w-full rounded-lg border border-slate-700 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-300/40"
+                                >
+                                    <option value="0">All categories</option>
+                                    @foreach ($categories as $categoryOption)
+                                        <option value="{{ $categoryOption->id }}" @selected((int) $selectedCategoryId === (int) $categoryOption->id)>
+                                            {{ $categoryOption->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                @if ((int) $selectedCategoryId > 0)
+                                    <a href="{{ route('dashboard') }}" class="rounded-lg border border-white/20 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:bg-white/10">Reset</a>
+                                @endif
+                                <button type="submit" class="rounded-lg bg-cyan-300 px-3 py-2 text-xs font-semibold text-slate-900 transition hover:bg-cyan-200">Apply</button>
+                            </div>
+                        </div>
+                    </form>
+
                     @forelse ($posts as $post)
                         @php
                             $initialComments = $post->comments->map(fn ($comment) => [
@@ -141,6 +188,8 @@
                                 truncatable: false,
                                 menuOpen: false,
                                 editing: false,
+                                editCategory: @js((string) ($post->category ?? ($post->categoryRecord?->name ?? ''))),
+                                originalCategory: @js((string) ($post->category ?? ($post->categoryRecord?->name ?? ''))),
                                 editContent: @js($post->content),
                                 originalContent: @js($post->content),
                                 commentsModalOpen: false,
@@ -327,6 +376,9 @@
                             <div class="flex items-center justify-between gap-3">
                                 <div class="flex items-center gap-2">
                                     <p class="text-sm sm:text-base lg:text-lg font-semibold text-cyan-200">{{ $post->user->name ?? 'Deactivated User' }}</p>
+                                    @if (filled($post->categoryRecord?->name) || filled($post->category))
+                                        <p class="text-[11px] text-slate-400">{{ $post->category }}</p>
+                                    @endif
                                     @if (($post->user?->isAdmin()))
                                         <span class="rounded-full border border-amber-300/30 bg-amber-300/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-200">Admin</span>
                                     @endif
@@ -407,6 +459,20 @@
                                     @csrf
                                     @method('PUT')
 
+                                    <input
+                                        x-model="editCategory"
+                                        name="edit_category"
+                                        type="text"
+                                        maxlength="120"
+                                        required
+                                        class="block w-full sm:w-1/2 rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-xs text-slate-200 placeholder:text-slate-500 focus:border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-300/40"
+                                        placeholder="Category"
+                                    />
+
+                                    @error('edit_category')
+                                        <p class="text-sm text-rose-300">{{ $message }}</p>
+                                    @enderror
+
                                     <textarea
                                         x-ref="editContent"
                                         x-model="editContent"
@@ -424,7 +490,7 @@
                                     <div class="flex justify-end gap-2">
                                         <button
                                             type="button"
-                                            @click="editing = false; editContent = originalContent"
+                                            @click="editing = false; editCategory = originalCategory; editContent = originalContent"
                                             class="rounded-lg border border-white/20 px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:bg-white/10"
                                         >
                                             Cancel

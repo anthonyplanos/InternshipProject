@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Posts\Schemas;
 
 use Filament\Forms\Components\BaseFileUpload;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Storage;
@@ -14,6 +15,9 @@ class PostForm
     {
         return $schema
             ->components([
+                TextInput::make('category')
+                    ->label('Category')
+                    ->maxLength(120),
                 Textarea::make('content')
                     ->label('Post Content')
                     ->required()

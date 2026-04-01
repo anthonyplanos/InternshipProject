@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Post;
+use App\Models\Category;
 use App\Models\Comment;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Http\Request;
@@ -18,20 +19,42 @@ Route::get('/dashboard', function (Request $request) {
         return redirect('/admin');
     }
 
+    $selectedCategoryId = (int) $request->query('category_id', 0);
+
+    $categories = Category::query()
+        ->orderBy('name')
+        ->get(['id', 'name']);
+
     $posts = Post::query()
-        ->with(['user', 'comments.user', 'comments.replies.user'])
+        ->with(['user', 'categoryRecord', 'comments.user', 'comments.replies.user'])
+        ->when($selectedCategoryId > 0, fn ($query) => $query->where('category_id', $selectedCategoryId))
         ->latest()
         ->paginate(10);
 
-    return view('dashboard', compact('posts'));
+    $posts->appends(['category_id' => $selectedCategoryId > 0 ? $selectedCategoryId : null]);
+
+    return view('dashboard', compact('posts', 'categories', 'selectedCategoryId'));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/posts', function (Request $request) {
         $validated = $request->validate([
+            'category' => ['required', 'string', 'max:120'],
             'content' => ['required', 'string', 'max:400'],
             'attachment' => ['nullable', 'image', 'max:' . config('uploads.post_attachment_max_kb'), 'mimes:jpg,jpeg,png,gif,webp'],
         ]);
+
+        $categoryName = trim((string) $validated['category']);
+
+        $category = Category::query()
+            ->whereRaw('LOWER(name) = ?', [strtolower($categoryName)])
+            ->first();
+
+        if (! $category) {
+            $category = Category::create([
+                'name' => $categoryName,
+            ]);
+        }
 
         $attachmentPath = $request->hasFile('attachment')
             ? $request->file('attachment')->store('post-attachments', 'public')
@@ -39,6 +62,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Post::create([
             'user_id' => $request->user()->id,
+            'category' => $categoryName,
+            'category_id' => $category->id,
             'content' => $validated['content'],
             'attachment' => $attachmentPath,
         ]);
@@ -50,10 +75,25 @@ Route::middleware(['auth', 'verified'])->group(function () {
         abort_unless((int) $post->user_id === (int) $request->user()->id, 403);
 
         $validated = $request->validate([
+            'edit_category' => ['required', 'string', 'max:120'],
             'edit_content' => ['required', 'string', 'max:400'],
         ]);
 
+        $categoryName = trim((string) $validated['edit_category']);
+
+        $category = Category::query()
+            ->whereRaw('LOWER(name) = ?', [strtolower($categoryName)])
+            ->first();
+
+        if (! $category) {
+            $category = Category::create([
+                'name' => $categoryName,
+            ]);
+        }
+
         $post->update([
+            'category' => $categoryName,
+            'category_id' => $category->id,
             'content' => $validated['edit_content'],
         ]);
 

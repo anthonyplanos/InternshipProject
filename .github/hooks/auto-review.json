@@ -1,14 +1,5 @@
 {
   "hooks": {
-    "PreToolUse": [
-      {
-        "type": "command",
-        "windows": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/hooks/auto-review.ps1",
-        "linux": "bash ./scripts/hooks/auto-review.sh",
-        "osx": "bash ./scripts/hooks/auto-review.sh",
-        "timeout": 5
-      }
-    ],
     "PostToolUse": [
       {
         "type": "command",

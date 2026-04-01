@@ -10,6 +10,7 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Storage;
@@ -24,6 +25,11 @@ class PostsTable
                     ->sortable(),
                 TextColumn::make('user.name')
                     ->label('Name')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('category')
+                    ->label('Category')
+                    ->badge()
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('content')
@@ -48,6 +54,11 @@ class PostsTable
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
+                SelectFilter::make('category_id')
+                    ->label('Category')
+                    ->relationship('categoryRecord', 'name')
+                    ->searchable()
+                    ->preload(),
                 TrashedFilter::make()
                     ->label('Archive Status')
                     ->placeholder('Only Active')

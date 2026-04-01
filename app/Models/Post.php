@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Models\Category;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
@@ -15,6 +17,8 @@ class Post extends Model
 
     protected $fillable = [
         'user_id',
+        'category',
+        'category_id',
         'content',
         'attachment',
     ];
@@ -23,13 +27,18 @@ class Post extends Model
     {
         return LogOptions::defaults()
             ->useLogName('post')
-            ->logOnly(['user_id', 'content', 'attachment'])
+            ->logOnly(['user_id', 'category', 'category_id', 'content', 'attachment'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
             ->setDescriptionForEvent(fn (string $eventName): string => match ($eventName) {
                 'created' => 'Post created: ' . trim((string) $this->content),
                 default => "Post {$eventName}",
             });
+    }
+
+    public function categoryRecord(): BelongsTo
+    {
+        return $this->belongsTo(Category::class, 'category_id');
     }
 
     public function user()
