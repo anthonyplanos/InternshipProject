@@ -86,7 +86,7 @@
                                     id="category"
                                     name="category"
                                     type="text"
-                                    maxlength="120"
+                                    maxlength="20"
                                     required
                                     class="block w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-xs text-slate-200 placeholder:text-slate-500 focus:border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-300/40"
                                     placeholder="Category (e.g. Product Improvements)"
@@ -95,14 +95,16 @@
                             @error('category')
                                 <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
                             @enderror
-                            <p class="mt-2 text-xs text-slate-400">Maximum 400 characters.</p>
                             @error('content')
                                 <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div>
-                            <label for="attachment" class="mb-2 block text-sm font-medium text-slate-200">Image (optional, max {{ config('uploads.post_attachment_max_mb') }} MB)</label>
+                            <label for="attachment" class="mb-2 block text-sm font-medium text-slate-200">
+                                Image
+                                <span class="ms-1 align-middle text-[11px] font-normal text-slate-500">max {{ config('uploads.post_attachment_max_mb') }} MB</span>
+                            </label>
                             <div class="rounded-xl border border-slate-700 bg-slate-950/60 px-3 py-2">
                                 <input x-ref="attachmentInput" @change="handleAttachmentChange($event)" id="attachment" type="file" name="attachment" accept=".jpg,.jpeg,.png,.gif,.webp" class="sr-only" />
                                 <div class="flex items-center gap-3">
@@ -138,27 +140,22 @@
 
                 <div class="space-y-4">
                     <form method="GET" action="{{ route('dashboard') }}" class="rounded-xl border border-white/10 bg-slate-900/60 p-3 sm:p-4">
-                        <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <div class="w-full sm:w-72">
-                                <label for="category_id" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400">Filter by Category</label>
-                                <select
-                                    id="category_id"
-                                    name="category_id"
+                                <input
+                                    id="search"
+                                    name="search"
+                                    type="text"
+                                    value="{{ $search }}"
                                     class="block w-full rounded-lg border border-slate-700 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-300/40"
-                                >
-                                    <option value="0">All categories</option>
-                                    @foreach ($categories as $categoryOption)
-                                        <option value="{{ $categoryOption->id }}" @selected((int) $selectedCategoryId === (int) $categoryOption->id)>
-                                            {{ $categoryOption->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
+                                    placeholder="Search category or post content..."
+                                />
                             </div>
                             <div class="flex items-center gap-2">
-                                @if ((int) $selectedCategoryId > 0)
+                                @if (filled($search))
                                     <a href="{{ route('dashboard') }}" class="rounded-lg border border-white/20 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:bg-white/10">Reset</a>
                                 @endif
-                                <button type="submit" class="rounded-lg bg-cyan-300 px-3 py-2 text-xs font-semibold text-slate-900 transition hover:bg-cyan-200">Apply</button>
+                                <button type="submit" class="rounded-lg bg-cyan-300 px-3 py-2 text-xs font-semibold text-slate-900 transition hover:bg-cyan-200">Search</button>
                             </div>
                         </div>
                     </form>
@@ -187,6 +184,7 @@
                                 expanded: false,
                                 truncatable: false,
                                 menuOpen: false,
+                                showComments: false,
                                 editing: false,
                                 editCategory: @js((string) ($post->category ?? ($post->categoryRecord?->name ?? ''))),
                                 originalCategory: @js((string) ($post->category ?? ($post->categoryRecord?->name ?? ''))),
@@ -202,6 +200,7 @@
                                 replyErrors: {},
                                 replyingTo: null,
                                 replyVisibleCount: {},
+                                replySectionsOpen: {},
                                 commentMenusOpen: {},
                                 replyMenusOpen: {},
                                 comments: @js($initialComments),
@@ -375,10 +374,13 @@
                         >
                             <div class="flex items-center justify-between gap-3">
                                 <div class="flex items-center gap-2">
-                                    <p class="text-sm sm:text-base lg:text-lg font-semibold text-cyan-200">{{ $post->user->name ?? 'Deactivated User' }}</p>
-                                    @if (filled($post->categoryRecord?->name) || filled($post->category))
-                                        <p class="text-[11px] text-slate-400">{{ $post->category }}</p>
-                                    @endif
+                                    <p class="inline-flex items-center gap-1.5 text-sm sm:text-base lg:text-lg font-semibold text-cyan-200">
+                                        <span>{{ $post->user->name ?? 'Deactivated User' }}</span>
+                                        @if (filled($post->category))
+                                            <span class="text-[11px] font-medium text-slate-400">&gt;</span>
+                                            <span class="text-xs font-medium text-slate-400">{{ $post->category }}</span>
+                                        @endif
+                                    </p>
                                     @if (($post->user?->isAdmin()))
                                         <span class="rounded-full border border-amber-300/30 bg-amber-300/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-200">Admin</span>
                                     @endif
@@ -463,7 +465,7 @@
                                         x-model="editCategory"
                                         name="edit_category"
                                         type="text"
-                                        maxlength="120"
+                                        maxlength="20"
                                         required
                                         class="block w-full sm:w-1/2 rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-xs text-slate-200 placeholder:text-slate-500 focus:border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-300/40"
                                         placeholder="Category"
@@ -518,9 +520,17 @@
                             @endif
 
                             <div class="mt-5 border-t border-white/10 pt-4">
-                                <p class="text-sm font-semibold text-cyan-200">Comments (<span x-text="comments.length"></span>)</p>
+                                <div class="flex justify-end">
+                                    <button
+                                        type="button"
+                                        @click="showComments = !showComments"
+                                        class="inline-flex items-center rounded-lg border border-cyan-300/30 px-3 py-1.5 text-xs font-semibold text-cyan-200 transition hover:bg-cyan-300/10"
+                                    >
+                                        Comment (<span x-text="comments.length"></span>)
+                                    </button>
+                                </div>
 
-                                <div class="mt-3 space-y-3">
+                                <div x-show="showComments" class="mt-3 space-y-3" style="display: none;">
                                     <template x-for="comment in comments.slice(-3)" :key="comment.id">
                                         <div class="rounded-xl border border-white/10 bg-slate-950/60 px-3 py-2.5">
                                             <div class="flex items-center justify-between gap-2">
@@ -558,7 +568,17 @@
                                             </div>
                                             <p class="mt-1 whitespace-pre-line wrap-anywhere text-sm text-slate-200" x-text="comment.content"></p>
 
-                                            <div class="mt-2 space-y-2 border-l border-white/10 ps-3" x-show="Array.isArray(comment.replies) && comment.replies.length > 0">
+                                            <div class="mt-2 flex justify-end">
+                                                <button
+                                                    type="button"
+                                                    @click="replySectionsOpen[comment.id] = !(replySectionsOpen[comment.id] ?? false)"
+                                                    class="rounded-md border border-cyan-300/30 px-2 py-0.5 text-[11px] font-semibold text-cyan-200 transition hover:bg-cyan-300/10"
+                                                >
+                                                    Reply (<span x-text="Array.isArray(comment.replies) ? comment.replies.length : 0"></span>)
+                                                </button>
+                                            </div>
+
+                                            <div class="mt-2 space-y-2 border-l border-white/10 ps-3" x-show="replySectionsOpen[comment.id] ?? false" style="display: none;">
                                                 <template x-for="reply in comment.replies.slice(0, replyVisibleCount[comment.id] ?? 2)" :key="'inline-reply-' + reply.id">
                                                     <div class="rounded-lg border border-white/10 bg-slate-900/60 px-2.5 py-2">
                                                         <div class="flex items-center justify-between gap-2">
@@ -598,7 +618,7 @@
                                                     </div>
                                                 </template>
 
-                                                <div class="pt-1" x-show="comment.replies.length > 2">
+                                                <div class="pt-1" x-show="Array.isArray(comment.replies) && comment.replies.length > 2">
                                                     <button
                                                         type="button"
                                                         @click="replyVisibleCount[comment.id] = (replyVisibleCount[comment.id] ?? 2) >= comment.replies.length ? 2 : comment.replies.length"
@@ -607,74 +627,77 @@
                                                         <span x-text="(replyVisibleCount[comment.id] ?? 2) >= comment.replies.length ? 'See less replies' : 'See more replies'"></span>
                                                     </button>
                                                 </div>
-                                            </div>
 
-                                            <div class="mt-2 flex justify-end">
-                                                <button
-                                                    type="button"
-                                                    @click="replyFormsOpen[comment.id] = !(replyFormsOpen[comment.id] ?? false); if (!(replyFormsOpen[comment.id] ?? false)) { replyErrors[comment.id] = ''; }"
-                                                    class="rounded-md border border-cyan-300/30 px-2 py-0.5 text-[11px] font-semibold text-cyan-200 transition hover:bg-cyan-300/10"
-                                                >
-                                                    <span x-text="(replyFormsOpen[comment.id] ?? false) ? 'Cancel reply' : 'Reply'"></span>
-                                                </button>
-                                            </div>
-
-                                            <form class="mt-2 space-y-2" x-show="replyFormsOpen[comment.id] ?? false" style="display: none;" @submit.prevent="submitReply(comment.id)">
-                                                <textarea
-                                                    x-model="replyDrafts[comment.id]"
-                                                    rows="2"
-                                                    maxlength="400"
-                                                    required
-                                                    class="block w-full resize-none rounded-lg border border-slate-700 bg-slate-950/60 px-2.5 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-300/40"
-                                                    placeholder="Reply to this comment..."
-                                                ></textarea>
-
-                                                <p x-show="replyErrors[comment.id]" x-text="replyErrors[comment.id]" class="text-xs text-rose-300"></p>
-
-                                                <div class="flex justify-end">
-                                                    <button :disabled="replyingTo === comment.id" type="submit" class="rounded-lg bg-cyan-300 px-2.5 py-1 text-[11px] font-semibold text-slate-900 transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-60">
-                                                        <span x-show="replyingTo !== comment.id">Reply</span>
-                                                        <span x-show="replyingTo === comment.id">Posting...</span>
+                                                <div class="mt-2 flex justify-end">
+                                                    <button
+                                                        type="button"
+                                                        @click="replyFormsOpen[comment.id] = !(replyFormsOpen[comment.id] ?? false); if (!(replyFormsOpen[comment.id] ?? false)) { replyErrors[comment.id] = ''; }"
+                                                        class="rounded-md px-2 py-0.5 text-[11px] font-semibold transition"
+                                                        :class="(replyFormsOpen[comment.id] ?? false)
+                                                            ? 'border border-cyan-300/30 text-cyan-200 hover:bg-cyan-300/10'
+                                                            : 'bg-cyan-300 text-slate-900 hover:bg-cyan-200'"
+                                                    >
+                                                        <span x-text="(replyFormsOpen[comment.id] ?? false) ? 'Cancel' : 'Reply'"></span>
                                                     </button>
                                                 </div>
-                                            </form>
+
+                                                <form class="mt-2 space-y-2" x-show="replyFormsOpen[comment.id] ?? false" style="display: none;" @submit.prevent="submitReply(comment.id)">
+                                                    <textarea
+                                                        x-model="replyDrafts[comment.id]"
+                                                        rows="2"
+                                                        maxlength="400"
+                                                        required
+                                                        class="block w-full resize-none rounded-lg border border-slate-700 bg-slate-950/60 px-2.5 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-300/40"
+                                                        placeholder="Reply to this comment..."
+                                                    ></textarea>
+
+                                                    <p x-show="replyErrors[comment.id]" x-text="replyErrors[comment.id]" class="text-xs text-rose-300"></p>
+
+                                                    <div class="flex justify-end">
+                                                        <button :disabled="Number(replyingTo) === Number(comment.id)" type="submit" class="rounded-md bg-cyan-300 px-2 py-0.5 text-[11px] font-semibold text-slate-900 transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-60">
+                                                            <span x-show="Number(replyingTo) !== Number(comment.id)">Reply</span>
+                                                            <span x-show="Number(replyingTo) === Number(comment.id)">Posting...</span>
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
                                         </div>
                                     </template>
 
                                     <p x-show="comments.length === 0" class="text-sm text-slate-400">No comments yet. Start the conversation.</p>
-                                </div>
 
-                                <div class="mt-2" x-show="comments.length > 3">
-                                    <button
-                                        type="button"
-                                        @click="commentsModalOpen = true"
-                                        class="text-xs font-semibold text-cyan-200 underline underline-offset-2 hover:text-cyan-100"
-                                    >
-                                        See more comments
-                                    </button>
-                                </div>
-
-                                <form @submit.prevent="submitComment()" class="mt-3 space-y-2">
-                                    @csrf
-                                    <textarea
-                                        x-model="commentContent"
-                                        name="comment_content"
-                                        rows="2"
-                                        maxlength="400"
-                                        required
-                                        class="block w-full resize-none rounded-xl border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-300/40"
-                                        placeholder="Write a comment..."
-                                    ></textarea>
-
-                                    <p x-show="commentError" x-text="commentError" class="text-sm text-rose-300"></p>
-
-                                    <div class="flex justify-end">
-                                        <button :disabled="isSubmittingComment" type="submit" class="rounded-lg bg-cyan-300 px-3 py-1.5 text-xs font-semibold text-slate-900 transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-60">
-                                            <span x-show="!isSubmittingComment">Comment</span>
-                                            <span x-show="isSubmittingComment">Posting...</span>
+                                    <div class="mt-2" x-show="comments.length > 3">
+                                        <button
+                                            type="button"
+                                            @click="commentsModalOpen = true"
+                                            class="text-xs font-semibold text-cyan-200 underline underline-offset-2 hover:text-cyan-100"
+                                        >
+                                            See more comments
                                         </button>
                                     </div>
-                                </form>
+
+                                    <form @submit.prevent="submitComment()" class="mt-3 space-y-2">
+                                        @csrf
+                                        <textarea
+                                            x-model="commentContent"
+                                            name="comment_content"
+                                            rows="2"
+                                            maxlength="400"
+                                            required
+                                            class="block w-full resize-none rounded-xl border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-300/40"
+                                            placeholder="Write a comment..."
+                                        ></textarea>
+
+                                        <p x-show="commentError" x-text="commentError" class="text-sm text-rose-300"></p>
+
+                                        <div class="flex justify-end">
+                                            <button :disabled="isSubmittingComment" type="submit" class="rounded-lg bg-cyan-300 px-3 py-1.5 text-xs font-semibold text-slate-900 transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-60">
+                                                <span x-show="!isSubmittingComment">Comment</span>
+                                                <span x-show="isSubmittingComment">Posting...</span>
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
 
                                 <div
                                     x-show="commentsModalOpen"
@@ -789,9 +812,12 @@
                                                         <button
                                                             type="button"
                                                             @click="replyFormsOpen[comment.id] = !(replyFormsOpen[comment.id] ?? false); if (!(replyFormsOpen[comment.id] ?? false)) { replyErrors[comment.id] = ''; }"
-                                                            class="rounded-md border border-cyan-300/30 px-2 py-0.5 text-[11px] font-semibold text-cyan-200 transition hover:bg-cyan-300/10"
+                                                            class="rounded-md px-2 py-0.5 text-[11px] font-semibold transition"
+                                                            :class="(replyFormsOpen[comment.id] ?? false)
+                                                                ? 'border border-cyan-300/30 text-cyan-200 hover:bg-cyan-300/10'
+                                                                : 'bg-cyan-300 text-slate-900 hover:bg-cyan-200'"
                                                         >
-                                                            <span x-text="(replyFormsOpen[comment.id] ?? false) ? 'Cancel reply' : 'Reply'"></span>
+                                                            <span x-text="(replyFormsOpen[comment.id] ?? false) ? 'Cancel' : 'Reply'"></span>
                                                         </button>
                                                     </div>
 
@@ -808,9 +834,9 @@
                                                         <p x-show="replyErrors[comment.id]" x-text="replyErrors[comment.id]" class="text-xs text-rose-300"></p>
 
                                                         <div class="flex justify-end">
-                                                            <button :disabled="replyingTo === comment.id" type="submit" class="rounded-lg bg-cyan-300 px-2.5 py-1 text-[11px] font-semibold text-slate-900 transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-60">
-                                                                <span x-show="replyingTo !== comment.id">Reply</span>
-                                                                <span x-show="replyingTo === comment.id">Posting...</span>
+                                                            <button :disabled="Number(replyingTo) === Number(comment.id)" type="submit" class="rounded-md bg-cyan-300 px-2 py-0.5 text-[11px] font-semibold text-slate-900 transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-60">
+                                                                <span x-show="Number(replyingTo) !== Number(comment.id)">Reply</span>
+                                                                <span x-show="Number(replyingTo) === Number(comment.id)">Posting...</span>
                                                             </button>
                                                         </div>
                                                     </form>

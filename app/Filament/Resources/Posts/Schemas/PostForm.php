@@ -17,7 +17,7 @@ class PostForm
             ->components([
                 TextInput::make('category')
                     ->label('Category')
-                    ->maxLength(120),
+                    ->maxLength(20),
                 Textarea::make('content')
                     ->label('Post Content')
                     ->required()

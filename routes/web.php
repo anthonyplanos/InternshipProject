@@ -19,27 +19,32 @@ Route::get('/dashboard', function (Request $request) {
         return redirect('/admin');
     }
 
-    $selectedCategoryId = (int) $request->query('category_id', 0);
-
-    $categories = Category::query()
-        ->orderBy('name')
-        ->get(['id', 'name']);
+    $search = trim((string) $request->query('search', ''));
 
     $posts = Post::query()
         ->with(['user', 'categoryRecord', 'comments.user', 'comments.replies.user'])
-        ->when($selectedCategoryId > 0, fn ($query) => $query->where('category_id', $selectedCategoryId))
+        ->when($search !== '', function ($query) use ($search) {
+            $needle = '%' . strtolower($search) . '%';
+
+            $query->where(function ($innerQuery) use ($needle) {
+                $innerQuery
+                    ->whereRaw('LOWER(posts.category) LIKE ?', [$needle])
+                    ->orWhereRaw('LOWER(posts.content) LIKE ?', [$needle])
+                    ->orWhereHas('categoryRecord', fn ($categoryQuery) => $categoryQuery->whereRaw('LOWER(name) LIKE ?', [$needle]));
+            });
+        })
         ->latest()
         ->paginate(10);
 
-    $posts->appends(['category_id' => $selectedCategoryId > 0 ? $selectedCategoryId : null]);
+    $posts->appends(['search' => $search !== '' ? $search : null]);
 
-    return view('dashboard', compact('posts', 'categories', 'selectedCategoryId'));
+    return view('dashboard', compact('posts', 'search'));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/posts', function (Request $request) {
         $validated = $request->validate([
-            'category' => ['required', 'string', 'max:120'],
+            'category' => ['required', 'string', 'max:20'],
             'content' => ['required', 'string', 'max:400'],
             'attachment' => ['nullable', 'image', 'max:' . config('uploads.post_attachment_max_kb'), 'mimes:jpg,jpeg,png,gif,webp'],
         ]);
@@ -75,7 +80,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         abort_unless((int) $post->user_id === (int) $request->user()->id, 403);
 
         $validated = $request->validate([
-            'edit_category' => ['required', 'string', 'max:120'],
+            'edit_category' => ['required', 'string', 'max:20'],
             'edit_content' => ['required', 'string', 'max:400'],
         ]);
 

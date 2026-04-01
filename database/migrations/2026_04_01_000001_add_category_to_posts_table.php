@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('posts', function (Blueprint $table): void {
-            $table->string('category', 120)->nullable()->after('user_id');
+            $table->string('category', 20)->nullable()->after('user_id');
         });
     }
 
