@@ -46,6 +46,17 @@ class Post extends Model
         return $this->belongsTo(\App\Models\User::class, 'user_id')->withTrashed();
     }
 
+    public function authorDisplayName(): string
+    {
+        $author = $this->user;
+
+        if (! $author || $author->trashed()) {
+            return 'Deactivated User';
+        }
+
+        return (string) $author->name;
+    }
+
     public function comments(): HasMany
     {
         return $this->hasMany(\App\Models\Comment::class)

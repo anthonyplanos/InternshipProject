@@ -96,15 +96,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         static::deleting(function (self $user): void {
             if ($user->isForceDeleting()) {
                 $user->posts()->withTrashed()->forceDelete();
-
-                return;
             }
-
-            $user->posts()->delete();
-        });
-
-        static::restoring(function (self $user): void {
-            $user->posts()->withTrashed()->restore();
         });
 
         static::forceDeleted(function (self $user): void {

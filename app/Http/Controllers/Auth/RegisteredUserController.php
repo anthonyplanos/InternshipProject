@@ -42,9 +42,11 @@ class RegisteredUserController extends Controller
 
         $request->validate([
             'name' => ['required', 'string', 'min:3', 'max:50'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)],
+            'email' => ['required', 'string', 'lowercase', 'email', 'ends_with:@gmail.com', 'max:255', Rule::unique(User::class)],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'acknowledge_policy' => ['accepted'],
+        ], [
+            'email.ends_with' => 'Register with the company email address (must end with @gmail.com).',
         ]);
 
         $user = User::create([

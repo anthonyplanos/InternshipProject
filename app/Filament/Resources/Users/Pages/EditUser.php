@@ -3,10 +3,13 @@
 namespace App\Filament\Resources\Users\Pages;
 
 use App\Filament\Resources\Users\UserResource;
+use App\Notifications\AdminPasswordResetNotification;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Support\Str;
+use Throwable;
 
 class EditUser extends EditRecord
 {
@@ -46,8 +49,6 @@ class EditUser extends EditRecord
 
     protected function getHeaderActions(): array
     {
-        $defaultPassword = (string) config('users.default_password', 'Password123!');
-
         return [
             Action::make('reset_password')
                 ->label('Reset Password')
@@ -55,11 +56,27 @@ class EditUser extends EditRecord
                 ->color('warning')
                 ->requiresConfirmation()
                 ->modalHeading('Reset User Password')
-                ->modalDescription('This will reset the user password to the configured default password.')
-                ->action(function () use ($defaultPassword): void {
-                    $this->record->forceFill([
-                        'password' => $defaultPassword,
-                    ])->save();
+                ->modalDescription('This will generate a new temporary password and email it to the user.')
+                ->action(function (): void {
+                    try {
+                        $temporaryPassword = Str::password(14, true, true, true, false);
+
+                        $this->record->forceFill([
+                            'password' => $temporaryPassword,
+                        ])->save();
+
+                        $this->record->notify(new AdminPasswordResetNotification($temporaryPassword));
+                    } catch (Throwable $exception) {
+                        report($exception);
+
+                        Notification::make()
+                            ->title('Password reset failed')
+                            ->body('The password reset email could not be sent. Please try again.')
+                            ->danger()
+                            ->send();
+
+                        return;
+                    }
 
                     activity('account')
                         ->causedBy(auth()->user())
@@ -76,7 +93,7 @@ class EditUser extends EditRecord
 
                     Notification::make()
                         ->title('Password reset complete')
-                        ->body('The user password was reset to the default password.')
+                        ->body('A temporary password was generated and sent to the user email.')
                         ->success()
                         ->send();
                 })

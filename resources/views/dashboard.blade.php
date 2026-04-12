@@ -450,13 +450,13 @@
                             <div class="flex items-center justify-between gap-3">
                                 <div class="flex items-center gap-2">
                                     <p class="inline-flex items-center gap-1.5 text-sm sm:text-base lg:text-lg font-semibold text-cyan-200">
-                                        <span>{{ $post->user->name ?? 'Deactivated User' }}</span>
+                                        <span>{{ $post->authorDisplayName() }}</span>
                                         @if (filled($post->category))
                                             <span class="text-[11px] font-medium text-slate-400">&gt;</span>
                                             <span class="text-xs font-medium text-slate-400">{{ $post->category }}</span>
                                         @endif
                                     </p>
-                                    @if (($post->user?->isAdmin()))
+                                    @if ($post->user && ! $post->user->trashed() && $post->user->isAdmin())
                                         <span class="rounded-full border border-amber-300/30 bg-amber-300/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-200">Admin</span>
                                     @endif
                                 </div>
@@ -646,7 +646,20 @@
                                             <div class="mt-2 flex justify-end">
                                                 <button
                                                     type="button"
-                                                    @click="replySectionsOpen[comment.id] = !(replySectionsOpen[comment.id] ?? false)"
+                                                    @click="
+                                                        const opening = !(replySectionsOpen[comment.id] ?? false);
+                                                        const hasReplies = Array.isArray(comment.replies) && comment.replies.length > 0;
+
+                                                        replySectionsOpen[comment.id] = opening;
+
+                                                        if (!opening) {
+                                                            replyFormsOpen[comment.id] = false;
+                                                            replyErrors[comment.id] = '';
+                                                        } else if (!hasReplies) {
+                                                            replyFormsOpen[comment.id] = true;
+                                                            replyErrors[comment.id] = '';
+                                                        }
+                                                    "
                                                     class="rounded-md border border-cyan-300/30 px-2 py-0.5 text-[11px] font-semibold text-cyan-200 transition hover:bg-cyan-300/10"
                                                 >
                                                     Reply (<span x-text="Array.isArray(comment.replies) ? comment.replies.length : 0"></span>)

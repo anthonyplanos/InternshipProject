@@ -65,7 +65,7 @@ class PostResource extends Resource
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
-            'Author' => (string) ($record->user?->name ?? 'Unknown'),
+            'Author' => $record instanceof Post ? $record->authorDisplayName() : (string) ($record->user?->name ?? 'Deactivated User'),
             'Content' => Str::limit((string) $record->content, 80),
         ];
     }
